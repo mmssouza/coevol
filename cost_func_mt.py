@@ -12,23 +12,23 @@ def fy(cc):
  return np.log(desc.bendenergy(cc,s)())
 
 
-diretorio = "../figs/"
+diretorio = "../leaves_png/"
 
 with open(diretorio+"classes.txt","r") as f:
  cl = cPickle.load(f)
 
-#with open("nomes_sampled.pkl","r") as f:
-# nomes = cPickle.load(f)
+with open("nomes_sampled.pkl","r") as f:
+ nomes = cPickle.load(f)
 
-cnt = [desc.contour(diretorio+k).c for k in cl.keys()]
+cnt = [desc.contour(diretorio+k).c for k in nomes]
 
-Y = np.array([cl[k] for k in cl.keys()]) 
+Y = np.array([cl[k] for k in nomes]) 
 
 mgr = Manager()
 
 l = mgr.list()
 
-pool = Pool(processes=2) 
+pool = Pool(processes=4) 
 
 def cost_func(args):
  #sys.stdout.write(".")
@@ -42,5 +42,3 @@ def cost_func(args):
 # mean square error (mse)
  #return ((1.-s)**2).mean()
 # return s.mean()
-
-

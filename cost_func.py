@@ -4,24 +4,28 @@ import cPickle
 import silhouette
 import descritores as desc
 from sklearn.preprocessing import scale
-diretorio = "../figs/"
 
-f = open(diretorio+"classes.txt","r")
-cl = cPickle.load(f)
+diretorio = "../leaves_png/"
+
+with open(diretorio+"classes.txt","r") as f:
+ cl = cPickle.load(f)
 f.close()
- 
+
+with open("nomes_sampled.pkl","r") as f:
+ nomes = cPickle.load(f)
+f.close()
+
+cnt = [desc.contour(diretorio+k).c for k in nomes]
+
+Y = np.array([cl[k] for k in nomes])  
+
 def cost_func(args):
- 
  X = []
- Y = []
  for im_file in cl.keys(): 
   nmbe  = desc.bendenergy(diretorio+im_file,args)
   X.append(np.log(nmbe()))
-  Y.append(cl[im_file])
-
  X = scale(np.array(X))
- Y = np.array(Y)
-
+ 
  s = silhouette.silhouette(X,Y-1)
 # s = silhouette_score(X,labels) 
 # return np.mean(s)

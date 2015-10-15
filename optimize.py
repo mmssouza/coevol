@@ -6,7 +6,7 @@ import cost_func
 import numpy as np
 from numpy.random import random_integers,rand,permutation
 
-Dim = 4
+Dim = 7
 
 class sim_ann:
 
@@ -26,7 +26,7 @@ class sim_ann:
   for i in range(x.shape[0]):
    if scipy.rand() < 0.3:
     aux = x[i]
-    x[i] = x[i] + 0.4*x[i]*(1+f)*scipy.randn()
+    x[i] = x[i] + 0.6*x[i]*(1+f)*scipy.randn()
     if not (0.125 <= x[i] <= 125):
 	 x[i] = aux
   return x
@@ -58,7 +58,6 @@ class sim_ann:
 class coevol:
 
  def __init__(self,challenge_func,ns = 10,npop1 = 40,pr = 0.3,beta = 0.5,npop2 = 100,w = 0.5,c1 = 2.01,c2 = 2.02):
-  self.sa = sim_ann(challenge_func,self.gera_individuo(),280,0.965,7,5)
   # Tamanho das populacoes
   self.ns = ns
   self.npop1 = npop1
@@ -129,7 +128,7 @@ class coevol:
  def resolve_desafio(self,x):
   for i in range(x.shape[0]):
    if not 0.125 <= x[i] <= 125.125:
-    x[i] = 124.*rand()+0.125
+    x[i] = 125.*rand()+0.125
     #x[i] = 50. - 100.*rand()
 	
   return (self.fc(x),x)
@@ -140,18 +139,10 @@ class coevol:
   i = permutation(self.npop1)[0:k]
   for a in self.ans1[i]:  
    if x < a:
-    #cnt = cnt + 1/(1+scipy.exp(-0.2*(12*(1- x/a) - 6)))
-        cnt = cnt - scipy.tanh(2*(x - a))
-	#cnt = cnt - scipy.tanh(1.5*(x-a))
-	#cnt = cnt + 1.- 4*(x-a)
+        cnt = cnt - scipy.tanh(2*(x - a))	
   for a in scipy.array(self.hall_of_fame1)[:,0]:
-   if x<a:
+   if x < a:
         cnt = cnt - scipy.tanh(2*(x - a))
-	#cnt = cnt + 1.- 4*(x-a)
-  for a in scipy.array(self.sa.hall_of_fame)[:,0]:
-   if x<a:
-        cnt = cnt - scipy.tanh(2*(x - a))
-	#cnt = cnt + 1.- 4*(x-a)
   return cnt
  
  def avalia_aptidao1(self,x):
@@ -161,15 +152,9 @@ class coevol:
   for a in self.ans2[i]:  
    if x<a:
         cnt = cnt - scipy.tanh(2*(x - a))
-#	cnt = cnt + 1.- 4*(x-a)
   for a in scipy.array(self.hall_of_fame2)[:,0]:
    if x<a:
         cnt = cnt - scipy.tanh(2*(x - a))
-#	cnt = cnt + 1.- 4*(x-a)
-  for a in scipy.array(self.sa.hall_of_fame)[:,0]:
-   if x<a:
-        cnt = cnt - scipy.tanh(2*(x - a))
-#	cnt = cnt + 1.- 4*(x-a)
   return cnt
 
  def HF1_Updt(self,x,y):
@@ -236,8 +221,8 @@ class coevol:
    self.pop2[i] = self.pop2[i] + self.v[i]   
    self.ans2[i],self.pop2[i] = self.resolve_desafio(self.pop2[i])
    self.fit2[i] = self.avalia_aptidao2(self.ans2[i])
-#   self.bfp_fitness[i] = self.avalia_aptidao2(self.bfp_ans[i])
-#   self.bfg_fitness = self.avalia_aptidao2(self.bfg_ans)
+   self.bfp_fitness[i] = self.avalia_aptidao2(self.bfp_ans[i])
+   self.bfg_fitness = self.avalia_aptidao2(self.bfg_ans)
    # Atualiza melhor posicao da particula
    if (self.fit2[i] > self.bfp_fitness[i]):
     self.bfp[i] = self.pop2[i]
@@ -270,7 +255,6 @@ class coevol:
      self.bfg_ans = self.bfp_ans[i].copy()    
    self.Evolve_PSO()
    self.HF2_Updt(self.bfg_ans,self.bfg)
-   self.sa.run()
    
 class de:
 
@@ -427,12 +411,3 @@ def f3(x):
    
   return -20*scipy.exp(-0.2*scipy.sqrt(k3*k1))-scipy.exp(k3*k2)+20+scipy.exp(1)
  
-#for j in range(3):
-#  w = coevol(f3,ns = 30,npop1 = 100,pr = 0.4,beta = 0.35,npop2 = 120,w = 0.9,c1 = .55,c2 = .55)
-#  for i in range(200):
-#   print i,w.fit1.max(),w.ans1[w.fit1.argmax()],w.bfg_fitness,w.bfg_ans
-   #for a,b in zip(w.hall_of_fame1,w.hall_of_fame2):
-   # print a[0],b[0]
-#   w.run()    
- 
-	
