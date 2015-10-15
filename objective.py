@@ -1,4 +1,6 @@
+#!/usr/bin/python -u
 
+import sys
 import scipy
 import numpy as np
 from sklearn.preprocessing import scale
@@ -8,7 +10,9 @@ import silhouette
 import descritores as desc
 import optimize
 import cost_func_mt 
+
 N,M = 1250,3
+optimize.set_dim(7)
 with open(sys.argv[1],"wb") as f:
  cPickle.dump((N,M),f)
  for j in range(M):

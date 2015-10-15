@@ -17,7 +17,7 @@ diretorio = "../leaves_png/"
 with open(diretorio+"classes.txt","r") as f:
  cl = cPickle.load(f)
 
-with open("nomes_sampled.pkl","r") as f:
+with open("96nomes_samples.pkl","r") as f:
  nomes = cPickle.load(f)
 
 cnt = [desc.contour(diretorio+k).c for k in nomes]
@@ -28,7 +28,7 @@ mgr = Manager()
 
 l = mgr.list()
 
-pool = Pool(processes=4) 
+pool = Pool(processes=2) 
 
 def cost_func(args):
  #sys.stdout.write(".")
