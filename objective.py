@@ -1,5 +1,6 @@
-
+#!/usr/bin/python -u
 import scipy
+import sys
 import numpy as np
 from sklearn.preprocessing import scale
 from multiprocessing import Pool,Manager
@@ -8,6 +9,7 @@ import silhouette
 import descritores as desc
 import optimize
 import cost_func_mt 
+
 N,M = 1250,3
 with open(sys.argv[1],"wb") as f:
  cPickle.dump((N,M),f)

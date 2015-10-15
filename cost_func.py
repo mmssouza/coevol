@@ -11,7 +11,7 @@ with open(diretorio+"classes.txt","r") as f:
  cl = cPickle.load(f)
 f.close()
 
-with open("nomes_sampled.pkl","r") as f:
+with open("96nomes_samples.pkl","r") as f:
  nomes = cPickle.load(f)
 f.close()
 
