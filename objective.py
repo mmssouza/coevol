@@ -2,7 +2,6 @@
 
 import sys
 import scipy
-import sys
 import numpy as np
 from sklearn.preprocessing import scale
 from multiprocessing import Pool,Manager
