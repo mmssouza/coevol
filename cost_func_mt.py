@@ -28,7 +28,7 @@ mgr = Manager()
 
 l = mgr.list()
 
-pool = Pool(processes=4) 
+pool = Pool(processes=2) 
 
 def cost_func(args):
  #sys.stdout.write(".")

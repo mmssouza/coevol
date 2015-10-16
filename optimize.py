@@ -2,11 +2,13 @@ import sys
 import scipy
 import math
 import cPickle
-import cost_func
 import numpy as np
 from numpy.random import random_integers,rand,permutation
 
 Dim = 7
+
+def set_dim(d):
+ Dim = d
 
 class sim_ann:
 
