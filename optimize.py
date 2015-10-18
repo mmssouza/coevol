@@ -141,10 +141,10 @@ class coevol:
   i = permutation(self.npop1)[0:k]
   for a in self.ans1[i]:  
    if x < a:
-        cnt = cnt - scipy.tanh(2*(x - a))	
+        cnt = cnt + 20*(a - x)	
   for a in scipy.array(self.hall_of_fame1)[:,0]:
    if x < a:
-        cnt = cnt - scipy.tanh(2*(x - a))
+        cnt = cnt + 40*(a - x)
   return cnt
  
  def avalia_aptidao1(self,x):
@@ -153,10 +153,10 @@ class coevol:
   i = permutation(self.npop2)[0:k]
   for a in self.ans2[i]:  
    if x<a:
-        cnt = cnt - scipy.tanh(2*(x - a))
+        cnt = cnt + 20*(a - x)
   for a in scipy.array(self.hall_of_fame2)[:,0]:
    if x<a:
-        cnt = cnt - scipy.tanh(2*(x - a))
+        cnt = cnt + 40*(a - x)
   return cnt
 
  def HF1_Updt(self,x,y):
@@ -241,20 +241,6 @@ class coevol:
     self.fit1[i] = self.avalia_aptidao1(self.ans1[i])	 
    self.Evolve_DE()
    self.HF1_Updt(self.ans1[self.fit1.argmax()],self.pop1[self.fit1.argmax()])   
-   for i in scipy.arange(self.npop2):
-    self.fit2[i] = self.avalia_aptidao2(self.ans2[i]) 
-    self.bfp_fitness[i] = self.avalia_aptidao2(self.bfp_ans[i])
-    self.bfg_fitness = self.avalia_aptidao2(self.bfg_ans)
-   # Atualiza melhor posicao da particula
-    if (self.fit2[i] > self.bfp_fitness[i]):
-     self.bfp[i] = self.pop2[i]
-     self.bfp_fitness[i] = self.fit2[i]
-     self.bfp_ans[i] = self.ans2[i]
-   # Atualiza melhor posicao global
-    if (self.bfp_fitness[i] > self.bfg_fitness):
-     self.bfg_fitness = self.bfp_fitness[i].copy()
-     self.bfg = self.bfp[i].copy()
-     self.bfg_ans = self.bfp_ans[i].copy()    
    self.Evolve_PSO()
    self.HF2_Updt(self.bfg_ans,self.bfg)
    
