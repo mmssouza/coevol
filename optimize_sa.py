@@ -6,7 +6,7 @@ import optimize
 import cost_func_mt 
 
 algo = "coevol"
-conf = (10,50,0.3,0.75,50,0.965,0.68,0.68)
+conf = [10,50,0.3,0.75,50,0.965,0.68,0.68]
 dim = 5
 dataset = "leaves_99_png"
 N,M = 1000,1
