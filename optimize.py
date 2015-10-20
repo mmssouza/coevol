@@ -1,14 +1,15 @@
+
 import sys
 import scipy
 import math
-import cPickle
 import numpy as np
 from numpy.random import random_integers,rand,permutation
 
 Dim = 7
 
 def set_dim(d):
- Dim = d
+
+ setattr(sys.modules[__name__],"Dim",d)
 
 class sim_ann:
 
@@ -29,7 +30,7 @@ class sim_ann:
    if scipy.rand() < 0.3:
     aux = x[i]
     x[i] = x[i] + 0.6*x[i]*(1+f)*scipy.randn()
-    if not (0.125 <= x[i] <= 125):
+    if not (0.125 <= x[i] <= 125.125):
 	 x[i] = aux
   return x
   
@@ -136,29 +137,33 @@ class coevol:
   return (self.fc(x),x)
   
  def avalia_aptidao2(self,x):
-  cnt = 0.
+  cnt = []
   k = self.ns
   i = permutation(self.npop1)[0:k]
   for a in self.ans1[i]:  
    if x < a:
-        cnt = cnt + 20*(a - x)	
+        cnt.append(a - x)	
   for a in scipy.array(self.hall_of_fame1)[:,0]:
    if x < a:
-        cnt = cnt + 40*(a - x)
-  return cnt
- 
+        cnt.append(2*(a - x))
+  if len(cnt): 
+   return np.median(np.array(cnt))
+  return 0.
+  
  def avalia_aptidao1(self,x):
-  cnt = 0
+  cnt = []
   k = self.ns
   i = permutation(self.npop2)[0:k]
   for a in self.ans2[i]:  
    if x<a:
-        cnt = cnt + 20*(a - x)
+        cnt.append(a - x)
   for a in scipy.array(self.hall_of_fame2)[:,0]:
    if x<a:
-        cnt = cnt + 40*(a - x)
-  return cnt
-
+        cnt.append(2*(a - x))
+  if len(cnt): 
+   return np.median(np.array(cnt))
+  return 0.
+  
  def HF1_Updt(self,x,y):
   # Hall of fame
   k = 0
@@ -262,12 +267,12 @@ class de:
   self.pop = scipy.array(self.pop)
  
  def gera_individuo(self):
-   return np.array([125*rand()+0.25 for i in range(Dim)]) 
+   return 125*rand(Dim)+0.125 
 
  def avalia_aptidao(self,x):
   for i in range(x.shape[0]):
-   if not 0.25 <= x[i] <= 125.25:
-    x[i] = 125*rand()+0.25
+   if not 0.125 <= x[i] <= 125.125:
+    x[i] = 125*rand()+0.125
   return (self.fitness_func(x),x)
   
  def run(self):  
@@ -346,11 +351,11 @@ class pso:
   self.bfg_fitness = self.bfp_fitness.min().copy()
 
  def gera_individuo(self):
-   return np.array([125*rand()+0.25 for i in range(Dim)])
+   return 125*rand(Dim)+0.125
 
  def avalia_aptidao(self,x): 
   for i in range(x.shape[0]):
-   if not 0.25 <= x[i] <= 125.25:
+   if not 0.125 <= x[i] <= 125.125:
     x[i] = 125*rand()+0.25
   return (self.fitness_func(x),x)
  
@@ -376,6 +381,10 @@ class pso:
    if  self.bfp_fitness[i] < self.bfg_fitness:
     self.bfg_fitness = self.bfp_fitness[i].copy()
     self.bfg = self.bfp[i].copy()
+
+#######################
+## Some Benchmark functions #
+#######################
 
 def f1(x):
  aux = 0
