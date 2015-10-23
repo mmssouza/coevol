@@ -112,8 +112,8 @@ import silhouette
 #sigma = numpy.array([   1.61253252,   11.43612451,    0.58806737,  109.87859876,    2.88713735])
 
 #mean silhouette = -0.132
-sigma = numpy.array([   2.24420614,    9.82516481,  124.83165341,  122.50265062,
-          1.53460893])
+#sigma = numpy.array([   2.24420614,    9.82516481,  124.83165341,  122.50265062,
+          #1.53460893])
 
 # MAD = 0.923 R2 = 0.97
 #sigma = numpy.array([  90.39356028,   44.49638044 ,  43.51058475 , 121.24898221,    4.68126646,
@@ -128,7 +128,15 @@ sigma = numpy.array([   2.24420614,    9.82516481,  124.83165341,  122.50265062,
 	   
 # MAD = 0.839 R2 = 0.99
 #sigma = numpy.array([124.16695613,   93.37727823,  31.69402865 ,  3.51881064,  2.14215328,   0.95603169,    0.7488448,  0.3641014])   
+ 
+# MAD = 0.853
+#sigma = numpy.array([ 46.0,  37.03,  23.58,  17.25,   1.924 ])
 
+#MAD = 0.872
+#sigma = numpy.array([ 41.21,  34.96, 19.06,  14.52, 1.821 ])
+
+#MAD = 0.8412
+ sigma = numpy.array([ 40.684,  29.580,  2.669,   1.292 , 0.163 ])
 colors = {1:"#555500",2:"#7faa00",3:"#aaff00",4:"#ff5500",5:"#00aa2a",6:"#2aff2a",7:"#7f002a",	
 8:"#aa2a2a",9:"#d4552a",10:"#ff7f2a",11:"#00d455",12:"#2aff55",13:"#7f2a55",14:"#aa5555",15:"#d47f55",	
 16:"#ffaa55",17:"#2a2a00",18:"#2aff7f",19:"#7f007f",20:"#aa557f",21:"#d47f7f",22:"#ffaa7f",23:"#00ffaa",	
@@ -142,13 +150,11 @@ with open(path+"classes.txt","r") as f:
    cl = cPickle.load(f)
    nomes = cPickle.load(g)
 
-
 db = {}
 
 for im_file in nomes:
  nmbe = desc.bendenergy(path+im_file,sigma)
  db[im_file] = numpy.hstack((cl[im_file],numpy.log(nmbe())))
-
 
 # nome das figuras
 data1 = numpy.array([db[i] for i in db.keys()])
