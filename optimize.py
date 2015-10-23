@@ -22,7 +22,7 @@ class sim_ann:
   self.f = f
   self.fit = self.f(self.s)
   self.hall_of_fame = []   
-  for i in scipy.arange(5):
+  for i in scipy.arange(15):
    self.hall_of_fame.insert(0,scipy.hstack((self.fit,self.s)))
   
  def Perturba(self,x,f):
@@ -50,9 +50,9 @@ class sim_ann:
 	if self.nS > 0:
 	 while (self.fit > self.hall_of_fame[k][0]):
 	  k = k + 1
-	  if k == 5:
+	  if k == 15:
 	   break
-	 if k < 5:
+	 if k < 15:
 	  self.hall_of_fame.insert(k,scipy.hstack((self.fit,self.s)))
 	  self.hall_of_fame.pop()   
 	break
@@ -94,11 +94,11 @@ class coevol:
   self.pop2 = scipy.array(self.pop2)
   
   self.hall_of_fame1 = []
-  for i in scipy.arange(5):
+  for i in scipy.arange(15):
     self.hall_of_fame1.insert(0,scipy.hstack((self.ans1.min(),self.pop1[self.ans1.argmin()])))
 	
   self.hall_of_fame2 = []
-  for i in scipy.arange(5):
+  for i in scipy.arange(15):
     #self.hall_of_fame2.insert(0,scipy.hstack((self.pso.fit[0],self.pso.pop[0])))
 	self.hall_of_fame2.insert(0,scipy.hstack((self.ans2.min(),self.pop2[self.ans2.argmin()])))
 	
@@ -127,51 +127,56 @@ class coevol:
  def gera_individuo(self):
    #return np.array([124.8*rand()+0.2 for i in range(Dim)])
    return 125.*rand(Dim)+0.125
+   #return 50. - 100.*rand(Dim)
+	
    
  def resolve_desafio(self,x):
   for i in range(x.shape[0]):
    if not 0.125 <= x[i] <= 125.125:
     x[i] = 125.*rand()+0.125
-    #x[i] = 50. - 100.*rand()
+   #x[i] = 50. - 100.*rand()
 	
   return (self.fc(x),x)
   
  def avalia_aptidao2(self,x):
-  cnt = []
-  k = self.ns
-  i = permutation(self.npop1)[0:k]
+  cnt = 0
+  i = permutation(self.npop1)[0:self.ns]
   for a in self.ans1[i]:  
    if x < a:
-        cnt.append(a - x)	
+    cnt  = cnt+10*(a - x)
+   else: 
+    cnt = cnt + 5*(a-x)	
   for a in scipy.array(self.hall_of_fame1)[:,0]:
    if x < a:
-        cnt.append(2*(a - x))
-  if len(cnt): 
-   return np.median(np.array(cnt))
-  return 0.
+    cnt = cnt + 20*(a - x)
+   else: 
+    cnt = cnt + 5*(a-x)
+  return cnt
   
  def avalia_aptidao1(self,x):
-  cnt = []
-  k = self.ns
-  i = permutation(self.npop2)[0:k]
+  cnt = 0
+  i = permutation(self.npop2)[0:self.ns]
   for a in self.ans2[i]:  
    if x<a:
-        cnt.append(a - x)
+    cnt = cnt + 10*(a - x)
+   else: 
+    cnt = cnt + 5*(a-x)
   for a in scipy.array(self.hall_of_fame2)[:,0]:
    if x<a:
-        cnt.append(2*(a - x))
-  if len(cnt): 
-   return np.median(np.array(cnt))
-  return 0.
+    cnt = cnt + 20*(a - x)
+   else:
+    cnt = cnt + 5*(a-x)
+  return cnt
+  
   
  def HF1_Updt(self,x,y):
   # Hall of fame
   k = 0
   while (x > self.hall_of_fame1[k][0]):
    k = k + 1
-   if k == 5:
+   if k == 15:
     break
-  if k < 5 and not (x == self.hall_of_fame1[k][0]):
+  if k < 15 and not (x == self.hall_of_fame1[k][0]):
    self.hall_of_fame1.insert(k,scipy.hstack((x,y)))
    self.hall_of_fame1.pop()
 
@@ -180,9 +185,9 @@ class coevol:
   k = 0
   while (x > self.hall_of_fame2[k][0]):
    k = k + 1
-   if k == 5:
+   if k == 15:
     break
-  if k < 5 and not (x == self.hall_of_fame2[k][0]):
+  if k < 15 and not (x == self.hall_of_fame2[k][0]):
    self.hall_of_fame2.insert(k,scipy.hstack((x,y)))
    self.hall_of_fame2.pop()
    
@@ -267,6 +272,7 @@ class de:
   self.pop = scipy.array(self.pop)
  
  def gera_individuo(self):
+  #return 50. - 100.*rand(Dim)
    return 125*rand(Dim)+0.125 
 
  def avalia_aptidao(self,x):
@@ -351,12 +357,12 @@ class pso:
   self.bfg_fitness = self.bfp_fitness.min().copy()
 
  def gera_individuo(self):
-   return 125*rand(Dim)+0.125
-
+  return 125*rand(Dim)+0.125
+  #return 50. - 100.*rand(Dim)
  def avalia_aptidao(self,x): 
   for i in range(x.shape[0]):
    if not 0.125 <= x[i] <= 125.125:
-    x[i] = 125*rand()+0.25
+    x[i] = 125*rand()+0.125
   return (self.fitness_func(x),x)
  
  def run(self):

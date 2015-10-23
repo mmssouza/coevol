@@ -8,9 +8,9 @@ import cost_func
 algo = "coevol"
 conf = [10,50,0.3,0.75,50,0.965,0.68,0.68]
 
-dim = 5
-dataset = "leaves_99_png"
-N,M = 100,3
+dim = 7
+dataset = "leaves_160_png"
+N,M = 1000,3
 
 Head = {'algo':"algo: "+algo,'conf':"ns = {0}, de: (npop,pr,alpha) = ({1}, {2}, {3}), pso: (npop,w,c1,c1) = ({4},{5},{6},{7})".format(conf[0],conf[1],conf[2],conf[3],conf[4],conf[5],conf[6],conf[7]),'dim':"n = {0}".format(dim),"dataset":"dataset: "+dataset}
 

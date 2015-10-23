@@ -9,12 +9,12 @@ import cPickle
 algo = "de"
 conf = [30,0.4,0.75]
 dim = 7
-dataset = "leaves_99_png"
+dataset = "leaves_160_png"
 N,M = 1000,3
 
 Head = {'algo':"algo: "+algo,'conf':" npop = {0}, pr = {1}, beta = {2}".format(conf[0],conf[1],conf[2]),'dim':"n = {0}".format(dim),"dataset":"dataset: "+dataset}
 
-depso.set_dim(dim)
+optimize.set_dim(dim)
 
 cost_func_mt.DatasetLoad("../"+dataset+"/")
 

@@ -8,7 +8,7 @@ import cPickle
 algo = "pso"
 conf = [25,0.965,2.68,2.68]
 dim = 5
-dataset = "leaves_99_png"
+dataset = "leaves_160_png"
 N,M = 100,3
 
 Head = {'algo':"algo: "+algo,'conf':"npop = {0}, w = {1}, c1 = {2}, c2 = {3}".format(conf[0],conf[1],conf[2],conf[3]),'dim':"n = {0}".format(dim),"dataset":"dataset: "+dataset}
