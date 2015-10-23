@@ -32,5 +32,7 @@ def cost_func(args):
  res = pool.map(fy,cnt)
  l.pop() 
  s = silhouette.silhouette(scale(np.array(res)),np.array(Y)-1)
+ #u = np.array([np.mean(np.abs(1. - s[np.array(Y) == i])) for i in range(1,max(Y)+1)])
+ #return u.sum()
  # median absolute deviation (mad)
  return np.mean(np.abs(1.-s))
