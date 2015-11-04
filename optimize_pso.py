@@ -12,7 +12,7 @@ fout = ""
 dim = -1
 
 try:                                
- opts,args = getopt.getopt(sys.argv[1:], "o:d:", ["mt","dim =","output=","dataset="])
+ opts,args = getopt.getopt(sys.argv[1:], "o:d:", ["mt","dim=","output=","dataset="])
 except getopt.GetoptError:           
  print "Error getopt"                          
  sys.exit(2)          
