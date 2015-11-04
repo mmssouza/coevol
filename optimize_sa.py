@@ -46,13 +46,13 @@ Head = {'algo':algo,'conf':"T0,alpha,P,L = {0},{1},{2},{3}".format(conf[0],conf[
 
 optimize.set_dim(dim)
 
-cost_func.DatasetLoad(dataset+"/")
+DatasetLoad(dataset+"/")
 
-with open(sys.argv[1],"wb") as f:
+with open(fout,"wb") as f:
  cPickle.dump(Head,f)
  cPickle.dump((N,M),f)
  for j in range(M):
-  w = optimize.sim_ann(cost_func.cost_func,0.125+pylab.rand(dim)*125.,conf[0],conf[1],conf[2],conf[3])
+  w = optimize.sim_ann(cost_func,0.125+pylab.rand(dim)*125.,conf[0],conf[1],conf[2],conf[3])
   for i in range(N):
    w.run()
    print i,w.fit
