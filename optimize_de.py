@@ -25,9 +25,8 @@ for opt,arg in opts:
   dataset = arg
  elif opt == "--dim":
   dim = int(arg) 
-  
-conf = [float(i) for i in args]
 
+conf = [float(i) for i in args]
 if dataset == "" or fout == "" or len(conf) != 3 or dim <= 0:
  print "Error getopt" 
  sys.exit(2)
@@ -47,7 +46,7 @@ optimize.set_dim(dim)
 DatasetLoad(dataset+"/")
 
 if __name__ == '__main__':
- with open(sys.argv[1],"wb") as f:
+ with open(fout,"wb") as f:
   cPickle.dump(Head,f)
   cPickle.dump((N,M),f)
   for j in range(M):

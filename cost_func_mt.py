@@ -25,7 +25,7 @@ mgr = Manager()
 
 l = mgr.list()
 
-pool = Pool(processes=2) 
+pool = Pool(processes=4) 
 
 def cost_func(args):
  l.append(args)
