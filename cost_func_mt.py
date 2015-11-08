@@ -19,7 +19,7 @@ def DatasetLoad(d):
 
 def fy(cc):
  s = l[0]
- return np.log(desc.bendenergy(cc,s)())
+ return np.log(desc.bendenergy(c,s[1:(int(s[0])+1)])())
 
 mgr = Manager()
 

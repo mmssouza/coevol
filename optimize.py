@@ -1,5 +1,7 @@
 
 import sys
+sys.path.append("../BitVector-3.3/")
+from BitVector import BitVector
 import scipy
 import math
 import numpy as np
@@ -253,11 +255,36 @@ class coevol:
    self.HF1_Updt(self.ans1[self.fit1.argmax()],self.pop1[self.fit1.argmax()])   
    self.Evolve_PSO()
    self.HF2_Updt(self.bfg_ans,self.bfg)
-   
+
+def crossover(A,B,C,dim):
+ bva = BitVector(intVal = A,size = dim)
+ bvb = BitVector(intVal = B,size = dim)
+ bvc = BitVector(intVal = C,size = dim)
+ bvd = BitVector(size = dim) 
+ 
+ aux = permutation(dim-1)
+ if aux[0] < aux[1]:
+  s1 = aux[0]
+  s2 = aux[1]
+ else:
+  s1 = aux[1]
+  s2 = aux[0]
+ 
+ for a,b,c in zip(permutation(3),[0,s1+1,s2+1],[s1+1,s2+1,dim]):
+  if a == 0:
+   bvd[b:c] = bva[b:c]
+  elif a == 1:
+   bvd[b:c] = bvb[b:c] 
+  else:
+   bvd[b:c] = bvc[b:c]
+ 
+ return int(bvd)   
+ 
 class de:
 
  def __init__(self,fitness_func,npop = 10,pr = 0.7,beta = 2.5,debug=False):
   self.ns = npop
+  self.nb = int(scipy.ceil(scipy.log2(Dim)))
   self.beta = beta
   self.pr  = pr 
   self.debug = debug
@@ -273,10 +300,13 @@ class de:
  
  def gera_individuo(self):
   #return 50. - 100.*rand(Dim)
-   return 125*rand(Dim)+0.125 
+   D = random_integers(2,Dim)
+   return scipy.hstack((D,125*rand(Dim)+0.125)) 
 
  def avalia_aptidao(self,x):
-  for i in range(x.shape[0]):
+  if not 2 <= x[0] <= Dim:
+   x[0] = random_integers(2,Dim)
+  for i in range(1,x.shape[0]):
    if not 0.125 <= x[i] <= 125.125:
     x[i] = 125*rand()+0.125
   return (self.fitness_func(x),x)
@@ -303,8 +333,14 @@ class de:
    if self.debug: print "j (mutacao) = {0}".format(j)
    # trial vector a partir da mutacao de um alvo 
    u = self.pop[j[0]] + self.beta*(self.pop[j[1]] - self.pop[j[2]])
+   # Dimensoes
+   a = int(self.pop[j[0]][0])
+   b = int(self.pop[j[1]][0])
+   c = int(self.pop[j[2]][0])
+ 
+   u[0] = crossover(a,b,c,self.nb)
    if self.debug: print "u (target vector) = {0}".format(u)
-
+    
    # gera por crossover solucao candidata
    c = self.pop[i].copy()  
    # seleciona indices para crossover
@@ -338,6 +374,7 @@ class pso:
   self.c2 = c2
   self.w = w
   self.ns = npop
+  self.nb = int(scipy.ceil(scipy.log2(Dim)))
   # gera pop inicial
   # centroides dos Kmax agrupamentos 
   self.pop = scipy.array([self.gera_individuo() for i in scipy.arange(self.ns)])
@@ -357,10 +394,13 @@ class pso:
   self.bfg_fitness = self.bfp_fitness.min().copy()
 
  def gera_individuo(self):
-  return 125*rand(Dim)+0.125
-  #return 50. - 100.*rand(Dim)
+  D = random_integers(2,Dim)
+  return scipy.hstack((D,125*rand(Dim)+0.125))
+  
  def avalia_aptidao(self,x): 
-  for i in range(x.shape[0]):
+  if not 2 <= x[0] <= Dim:
+   x[0] = random_integers(2,Dim)
+  for i in range(1,x.shape[0]):
    if not 0.125 <= x[i] <= 125.125:
     x[i] = 125*rand()+0.125
   return (self.fitness_func(x),x)
@@ -373,8 +413,12 @@ class pso:
    self.v[i] = self.v[i] + self.c1*scipy.rand()*( self.bfp[i] - self.pop[i]) 
    self.v[i] = self.v[i] + self.c2*scipy.rand()*(self.bfg - self.pop[i])
    # Atualiza posicao
-   self.pop[i] = self.pop[i] + self.v[i]
-   
+   self.pop[i][1:] = self.pop[i][1:] + self.v[i][1:]
+   a = int(self.pop[i][0])
+   b = int(self.bfp[i][0])
+   c = int(self.bfg[0])
+ 
+   self.pop[i][0] = crossover(a,b,c,self.nb)
    self.fit[i],self.pop[i] = self.avalia_aptidao(self.pop[i])
    
    # Atualiza melhor posicao da particula
