@@ -3,7 +3,6 @@
 import sys
 import getopt
 import optimize
-import cost_func_mt
 import cPickle
 
 mt = False
@@ -44,14 +43,14 @@ Head = {'algo':algo,'conf':"npop = {0}, w = {1}, c1 = {2}, c2 = {3}".format(conf
 
 optimize.set_dim(dim)
 
-cost_func_mt.DatasetLoad(dataset+"/")
+DatasetLoad(dataset+"/")
 
 if __name__ == '__main__':
  with open(fout,"wb") as f:
   cPickle.dump(Head,f)
   cPickle.dump((N,M),f)
   for j in range(M):
-   u = optimize.pso(cost_func_mt.cost_func,npop =conf[0],w = conf[1],c1 = conf[2],c2 = conf[3])
+   u = optimize.pso(cost_func,npop =conf[0],w = conf[1],c1 = conf[2],c2 = conf[3])
    for i in range(N):
     u.run()
     print i,u.bfg_fitness
