@@ -1,6 +1,5 @@
 
 import sys
-sys.path.append("../BitVector-3.3/")
 from BitVector import BitVector
 import scipy
 import math

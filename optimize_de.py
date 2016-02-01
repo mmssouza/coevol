@@ -8,7 +8,8 @@ import scipy
 import cPickle
 from multiprocessing import Pool,Manager
 import numpy as np
-import silhouette
+#import silhouette
+import metrics
 import descritores as desc
 from sklearn.preprocessing import scale
 from functools import partial
@@ -57,16 +58,17 @@ if __name__ == '__main__':
     cnt.append(desc.contour(dataset+"/"+k).c)
     Y.append(cl[k])
 	
- pool = Pool(processes=2)
+ pool = Pool(processes=7)
  
  def cost_func(args):   
   partial_ff = partial(ff, s = args)
   res = pool.map(partial_ff,cnt)
-  s = silhouette.silhouette(scale(np.array(res)),np.array(Y)-1)
+  return metrics.CS(scale(np.array(res)),np.array(Y)-1)
+  #s = silhouette.silhouette(scale(np.array(res)),np.array(Y)-1)
  #u = np.array([np.mean(np.abs(1. - s[np.array(Y) == i])) for i in range(1,max(Y)+1)])
  #return u.sum()
  # median absolute deviation (mad)
-  return np.median(np.abs(1.-s))
+  #return np.median(np.abs(1.-s))
 
  optimize.set_dim(dim)
 
