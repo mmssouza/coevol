@@ -56,9 +56,6 @@ import silhouette
 # Fitness = 0.668140653845
 #sigma = numpy.array([65.07,6.39,2.63,2.35,0.7,0.29720314]) 
 
-# MAD = 0.603
-#sigma = numpy.array([ 0.98257302,   55.96277287,    1.74498014,    5.58365476])
-
 # Fitness = -0.5 (Mediana silhouette)
 #sigma = numpy.array([ 2.35139906,  47.82679226,   7.09654377,  50.53723473,   0.25904659])
 # Fitness = -0.53 (Mediana Silhouette)
@@ -146,43 +143,8 @@ import silhouette
 #   54.9519924,    67.36983136,  104.71769155])
 
 #MAD = 0.77847301168514837
-#sigma = numpy.array([  53.03032859,    0.80239139,    1.15188946, 1.55907899,
-#          0.15173929,    8.34292094,    0.34385214,  108.16470865])
-iter = [0,1,3,10,29,81,101,118,120,138,160,176,195,298,498,513]
-mad = [0.989,0.981,0.970,0.940,0.9314,0.9313,0.9310,0.930,0.928,0.926,0.923,0.919,0.918,
-       0.914,0.911,0.907]		  
-scales = [numpy.array([ 32.5042693 ,  16.68892057,  22.77857802,   3.77225301,
-        15.15575266,   0.18360745,  35.38746981]),
-		  numpy.array([  37.31498068,  112.19205953,   43.00597078,    6.36793074,
-        28.44467131,    1.69539416,   25.82911675]),
-		numpy.array([ 20.98385874,  87.95515922,  43.00597078,   6.36793074,
-        28.44467131,   1.69539416,  25.82911675]),
-		numpy.array([  3.66194403,   0.94344187,  93.52416061,  29.22093386,
-        25.70745041,  16.35755369,  32.28538842]),
-		numpy.array([  84.00051884,    3.73778537,   84.06060177,   25.57428834,
-          0.88878234,   89.41983978,  102.54926035]),
-		numpy.array([  82.90957132,  108.44750699,   81.10036394,    0.32856545,
-         73.90833889,    3.78662843,   28.782846  ]),
-		numpy.array([ 114.26966243,    3.73778537,   84.06060177,   25.57428834,
-          0.88878234,   89.41983978,   71.29309038]),
-		numpy.array([ 27.66364497,  98.89118165,   3.6845802 ,   0.52495653,
-        58.96200443,  94.85096773,  98.20711267]),
-		numpy.array([   0.73623412,   97.75236806,   25.65024043,    2.84927922,
-        105.29196588,   92.60119869,   74.49928017]),
-		numpy.array([ 112.93271947,   25.28346101,  101.72494975,    0.32856545,
-         73.90833889,    3.78662843,    1.42335543]),
-		numpy.array([ 112.93271947,   25.28346101,  101.72494975,   86.62143768,
-         73.90833889,    3.78662843,    1.42335543]),
-		numpy.array([  25.62929162,    1.2139342 ,   74.35743716,    3.5497716 ,
-        110.39554838,   74.45533883,   24.87270269]),
-		numpy.array([   3.91455022,   99.70078821,   90.90091502,    1.2611697 ,
-        100.49387201,   28.42471137,   27.3176634 ]),
-		numpy.array([ 97.32436663,  99.41808211,  68.16512847,  98.95828305,
-         3.68227988,  26.72716089,   1.4373014 ]),
-		numpy.array([   3.66194403,    0.94344187,   94.61125694,   29.22093386,
-         29.51423072,   92.74770003,  109.89945468]),
-		numpy.array([   1.52509011,   94.30698368,   98.51506348,    3.80663321,
-         27.12597685,  114.81224102,   29.38772097]) ]
+sigma = numpy.array([  53.03032859,    0.80239139,    1.15188946, 1.55907899,
+          0.15173929,    8.34292094,    0.34385214,  108.16470865])
 		  
 colors = {1:"#555500",2:"#7faa00",3:"#aaff00",4:"#ff5500",5:"#00aa2a",6:"#2aff2a",7:"#7f002a",	
 8:"#aa2a2a",9:"#d4552a",10:"#ff7f2a",11:"#00d455",12:"#2aff55",13:"#7f2a55",14:"#aa5555",15:"#d47f55",	
@@ -197,63 +159,64 @@ with open(path+"classes.txt","r") as f:
    cl = cPickle.load(f)
    nomes = cPickle.load(g)
 
-for s,ii,m in zip(scales,iter,mad):
- db = {}
+db = {}
 
- for im_file in nomes:
-  nmbe = desc.bendenergy(path+im_file,s)
-  db[im_file] = numpy.hstack((cl[im_file],numpy.log(nmbe())))
+for im_file in nomes:
+ nmbe = desc.bendenergy(path+im_file,sigma)
+ db[im_file] = numpy.hstack((cl[im_file],numpy.log(nmbe())))
 
- # nome das figuras
- data1 = numpy.array([db[i] for i in db.keys()])
- Y = data1[:,0].astype(int)
- X1 = scale(data1[:,1:])
-# s = silhouette.silhouette(X1,Y-1)
-# print numpy.median(numpy.abs(1.-  s))
- mds =  MDS(n_init = 20,dissimilarity = 'euclidean',max_iter = 2500)
- X1 = mds.fit_transform(data1[:,1:])
-# r = ((pdist(data1[:,1:]) - pdist(X1))**2).sum()
-# s = ((pdist(X1)-pdist(X1).mean())**2).sum()
-# R2 = 1-r/s
-# print R2
- data = numpy.vstack((Y,X1.transpose())).transpose()
+# nome das figuras
+data1 = numpy.array([db[i] for i in db.keys()])
 
- db = dict(zip(db.keys(),data))
+Y = data1[:,0].astype(int)
+X1 = scale(data1[:,1:])
+s = silhouette.silhouette(X1,Y-1)
+print numpy.median(numpy.abs(1.-  s))
+
+#iso = Isomap(n_neighbors=98, max_iter= 2500)
+mds =  MDS(n_init = 20,dissimilarity = 'euclidean',max_iter = 2500)
+#X1 = iso.fit_transform(data1[:,1:])
+X1 = mds.fit_transform(data1[:,1:])
+
+r = ((pdist(data1[:,1:]) - pdist(X1))**2).sum()
+s = ((pdist(X1)-pdist(X1).mean())**2).sum()
+R2 = 1-r/s
+print R2
+data = numpy.vstack((Y,X1.transpose())).transpose()
+
+db = dict(zip(db.keys(),data))
  
- fig = PLT.gcf()
- fig.clf()
- ax = PLT.subplot(111)
- PLT.gray()
- PLT.xlim((-5,10))
- PLT.ylim((-5,10))
- for im in db.keys():
-  # add a first image
-  img = Image.open(path+im)
-  img.thumbnail((150,150),Image.ANTIALIAS)
-  #img = PIL.ImageOps.invert(img.convert("L"))
-  img = img.convert("RGBA")
-  datas = img.getdata()
-  newData = []
-  for item in datas:
+fig = PLT.gcf()
+fig.clf()
+ax = PLT.subplot(111)
+PLT.gray()
+PLT.xlim((-3.5,3.5))
+PLT.ylim((-3.5,4))
+for im in db.keys():
+ # add a first image
+ img = Image.open(path+im)
+ img.thumbnail((150,150),Image.ANTIALIAS)
+ #img = PIL.ImageOps.invert(img.convert("L"))
+ img = img.convert("RGBA")
+ datas = img.getdata()
+ newData = []
+ for item in datas:
    if item[0] == 255 and item[1] == 255 and item[2] == 255:
      newData.append((255, 255, 255, 0))
    else:
      newData.append(ImageColor.getrgb(colors[int(db[im][0])]))
-  img.putdata(newData) 
-  imagebox = OffsetImage(numpy.array(img), zoom=.15)
-  xy = [db[im][1],db[im][2]]               # coordinates to position this image
-  ab = AnnotationBbox(imagebox, xy,
+ img.putdata(newData) 
+ imagebox = OffsetImage(numpy.array(img), zoom=.15)
+ xy = [db[im][1],db[im][2]]               # coordinates to position this image
+ ab = AnnotationBbox(imagebox, xy,
       xybox=(5., -5.),
       xycoords='data',
       boxcoords="offset points",
 	  frameon = False)                                  
-  ax.add_artist(ab)
+ ax.add_artist(ab)
 
- # rest is just standard matplotlib boilerplate
- ax.grid(False)
- PLT.draw()
- nn = str("{0}.jpg").format(ii)
- print nn
- PLT.savefig(nn)
-# PLT.show()
+# rest is just standard matplotlib boilerplate
+ax.grid(False)
+PLT.draw()
+PLT.show()
 
