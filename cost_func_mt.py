@@ -1,38 +1,38 @@
-
+import sys
 from multiprocessing import Pool,Manager
 import numpy as np
 import cPickle
-import silhouette
-import descritores as desc
+import metrics
+import descritores 
 from sklearn.preprocessing import scale
 
-Y,cnt = [],[]
+Y,cl = [],{}
+path = ""
 
 def DatasetLoad(d):
- with open(d+"classes.txt","r") as f:
-  cl = cPickle.load(f)
-  with open(d+"names.pkl","r") as f:
-   nomes = cPickle.load(f)
-   for k in nomes:
-    cnt.append(desc.contour(d+k).c)
-    Y.append(cl[k]) 
+ setattr(sys.modules[__name__],"path",d)
+ with open(path+"classes.txt","r") as f:
+  c = cPickle.load(f)
+  for i,j in zip(c.keys(),c.values()):
+   Y.append(int(j))
+   cl[i] = j
 
-def fy(cc):
+def fy(im_file):
  s = l[0]
- return np.log(desc.bendenergy(cc,s)())
+ tmp = descritores.cd(im_file)
+ tmp_h = np.histogram(tmp,bins = int(s[0]),range = (s[1],s[2]))[0]
+ tmp_h = tmp_h.astype(float)/tmp_h.sum()
+ return tmp_h
 
 mgr = Manager()
 
 l = mgr.list()
 
-pool = Pool(processes=4) 
+pool = Pool(processes = 2) 
 
 def cost_func(args):
  l.append(args)
- res = pool.map(fy,cnt)
+ caux = [ path+i for i in cl.keys()]
+ res = pool.map(fy,caux)
  l.pop() 
- s = silhouette.silhouette(scale(np.array(res)),np.array(Y)-1)
- #u = np.array([np.mean(np.abs(1. - s[np.array(Y) == i])) for i in range(1,max(Y)+1)])
- #return u.sum()
- # median absolute deviation (mad)
- return np.median(np.abs(1.-s))
+ return metrics.CS(np.array(res),np.array(Y)-1)

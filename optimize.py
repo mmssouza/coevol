@@ -5,7 +5,7 @@ import math
 import numpy as np
 from numpy.random import random_integers,rand,permutation
 
-Dim = 7
+Dim = 3
 
 def set_dim(d):
 
@@ -125,18 +125,20 @@ class coevol:
   
 
  def gera_individuo(self):
-   #return np.array([124.8*rand()+0.2 for i in range(Dim)])
-   return 125.*rand(Dim)+0.125
-   #return 50. - 100.*rand(Dim)
-	
+  l = []
+  l.append(random_integers(3,200))
+  l.append(0.1+ 0.2*rand())
+  l.append(0.6+0.4*rand())
+  return np.array(l)	
    
  def resolve_desafio(self,x):
-  for i in range(x.shape[0]):
-   if not 0.125 <= x[i] <= 125.125:
-    x[i] = 125.*rand()+0.125
-   #x[i] = 50. - 100.*rand()
-	
-  return (self.fc(x),x)
+    if not 3 <= x[0] <= 200:
+       x[0] = random_integers(3,200)
+    if not 0. <= x[1] <= .3:
+      x[1] = 0.1+0.2*rand()
+    if not 0.6 <= x[2] <= 1.:
+      x[2] = 0.6+0.4*rand()
+    return (self.fc(x),x)
   
  def avalia_aptidao2(self,x):
   cnt = 0
@@ -167,8 +169,7 @@ class coevol:
    else:
     cnt = cnt + 5*(a-x)
   return cnt
-  
-  
+   
  def HF1_Updt(self,x,y):
   # Hall of fame
   k = 0
@@ -272,14 +273,20 @@ class de:
   self.pop = scipy.array(self.pop)
  
  def gera_individuo(self):
-  #return 50. - 100.*rand(Dim)
-   return 125*rand(Dim)+0.125 
+  l = []
+  l.append(random_integers(3,200))
+  l.append(0.1+ 0.2*rand())
+  l.append(0.6+0.4*rand())
+  return np.array(l)
 
  def avalia_aptidao(self,x):
-  for i in range(x.shape[0]):
-   if not 0.125 <= x[i] <= 125.125:
-    x[i] = 125*rand()+0.125
-  return (self.fitness_func(x),x)
+    if not 3 <= x[0] <= 200:
+       x[0] = random_integers(3,200)
+    if not 0. <= x[1] <= .3:
+      x[1] = 0.1+0.2*rand()
+    if not 0.6 <= x[2] <= 1.:
+      x[2] = 0.6+0.4*rand()
+    return (self.fitness_func(x),x)
   
  def run(self):  
   #prox_geracao = []
@@ -357,14 +364,21 @@ class pso:
   self.bfg_fitness = self.bfp_fitness.min().copy()
 
  def gera_individuo(self):
-  return 125*rand(Dim)+0.125
-  #return 50. - 100.*rand(Dim)
- def avalia_aptidao(self,x): 
-  for i in range(x.shape[0]):
-   if not 0.125 <= x[i] <= 125.125:
-    x[i] = 125*rand()+0.125
-  return (self.fitness_func(x),x)
- 
+  l = []
+  l.append(random_integers(3,200))
+  l.append(0.1+ 0.2*rand())
+  l.append(0.6+0.4*rand())
+  return np.array(l)
+
+ def avalia_aptidao(self,x):
+    if not 3 <= x[0] <= 200:
+       x[0] = random_integers(3,200)
+    if not 0. <= x[1] <= .3:
+      x[1] = 0.1+0.2*rand()
+    if not 0.6 <= x[2] <= 1.:
+      x[2] = 0.6+0.4*rand()
+    return (self.fitness_func(x),x)
+
  def run(self):
  
   for i in scipy.arange(self.ns):

@@ -4,7 +4,6 @@ import sys
 import getopt
 import cPickle
 import optimize
-import cost_func
 
 mt = False
 dataset = ""
@@ -44,13 +43,13 @@ Head = {'algo':algo,'conf':"ns = {0}, de: (npop,pr,alpha) = ({1}, {2}, {3}), pso
 
 optimize.set_dim(dim)
 
-cost_func.DatasetLoad("../"+dataset+"/")
+DatasetLoad(dataset+"/")
 
 with open(fout,"wb") as f:
  cPickle.dump(Head,f)
  cPickle.dump((N,M),f)
  for j in range(M):
-  w = optimize.coevol(cost_func.cost_func,ns = conf[0],npop1 = conf[1],pr = conf[2],beta = conf[3],npop2 = conf[4],w = conf[5],c1 = conf[6],c2 = conf[7])
+  w = optimize.coevol(cost_func,ns = int(conf[0]),npop1 = int(conf[1]),pr = conf[2],beta = conf[3],npop2 = int(conf[4]),w = conf[5],c1 = conf[6],c2 = conf[7])
   for i in range(N):
    w.run()
    print i,w.fit1.max(),w.ans1[w.fit1.argmax()],w.bfg_fitness,w.bfg_ans
