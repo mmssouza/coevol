@@ -3,7 +3,7 @@ import sys
 import scipy
 import math
 import numpy as np
-from numpy.random import random_integers,rand,permutation
+from numpy.random import seed,random_integers,rand,permutation
 
 Dim = 7
 
@@ -14,6 +14,7 @@ def set_dim(d):
 class sim_ann:
 
  def __init__(self,f,s0,T0,alpha,P,L):
+  seed()
   self.s = s0
   self.T = T0
   self.P = P
@@ -62,6 +63,7 @@ class coevol:
 
  def __init__(self,challenge_func,ns = 10,npop1 = 40,pr = 0.3,beta = 0.5,npop2 = 100,w = 0.5,c1 = 2.01,c2 = 2.02):
   # Tamanho das populacoes
+  seed()
   self.ns = ns
   self.npop1 = npop1
   self.npop2 = npop2
@@ -257,6 +259,7 @@ class coevol:
 class de:
 
  def __init__(self,fitness_func,npop = 10,pr = 0.7,beta = 2.5,debug=False):
+  seed()
   self.ns = npop
   self.beta = beta
   self.pr  = pr 
@@ -333,6 +336,7 @@ class de:
 class pso:
 
  def __init__(self,fitness_func,npop = 20,w = 0.5,c1 = 2.01,c2 = 2.02,debug = False):
+  seed()
   self.debug = debug
   self.c1 = c1
   self.c2 = c2
@@ -369,6 +373,7 @@ class pso:
  
   for i in scipy.arange(self.ns):
    # Atualiza velocidade
+   
    self.v[i] = self.w*self.v[i] 
    self.v[i] = self.v[i] + self.c1*scipy.rand()*( self.bfp[i] - self.pop[i]) 
    self.v[i] = self.v[i] + self.c2*scipy.rand()*(self.bfg - self.pop[i])
