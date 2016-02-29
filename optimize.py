@@ -352,7 +352,7 @@ class pso:
    self.fit[i],self.pop[i] = self.avalia_aptidao(self.pop[i])  
    
   # inicializa velocidades iniciais
-  self.v = scipy.array([self.gera_individuo() for i in scipy.arange(self.ns)])
+  self.v = scipy.zeros((self.ns,Dim))
   # guarda a melhor posicao de cada particula 
   self.bfp = scipy.copy(self.pop)
   self.bfp_fitness = scipy.copy(self.fit)
@@ -363,10 +363,13 @@ class pso:
  def gera_individuo(self):
   return 125*rand(Dim)+0.125
   #return 50. - 100.*rand(Dim)
+
  def avalia_aptidao(self,x): 
-  for i in range(x.shape[0]):
-   if not 0.125 <= x[i] <= 125.125:
-    x[i] = 125*rand()+0.125
+  for i in range(Dim):
+   if x[i] < 0.125:
+    x[i] = 0.125
+   elif x[i] > 125.125:
+    x[i] = 125.125
   return (self.fitness_func(x),x)
  
  def run(self):
@@ -377,6 +380,11 @@ class pso:
    self.v[i] = self.w*self.v[i] 
    self.v[i] = self.v[i] + self.c1*scipy.rand()*( self.bfp[i] - self.pop[i]) 
    self.v[i] = self.v[i] + self.c2*scipy.rand()*(self.bfg - self.pop[i])
+   for j in range(Dim):
+    if self.v[i][j] >= 12.6:
+     self.v[i][j] = 12.6
+    elif self.v[i][j] <= -12.6:
+     self.v[i][j] = -12.6
    # Atualiza posicao
    self.pop[i] = self.pop[i] + self.v[i]
    
