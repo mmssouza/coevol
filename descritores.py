@@ -6,7 +6,7 @@ import cv
 from scipy.interpolate import interp1d 
 from scipy.spatial.distance import pdist,squareform
 from math import sqrt,acos
-
+from oct2py import Oct2Py
 class contour_base:
  '''Represents an binary image contour as a complex discrete signal. 
    Some calculation methods are provided to compute contour 1st derivative, 2nd derivatives and perimeter.
@@ -15,16 +15,24 @@ class contour_base:
  
  '''
 
- def __init__(self,fn):
-
+ def __init__(self,fn,method = 'cv'):
   self.__i = 0
-  if type(fn) is str:
-   im = cv.LoadImage(fn,cv.CV_LOAD_IMAGE_GRAYSCALE)
-   s = cv.FindContours(im,cv.CreateMemStorage(),cv.CV_RETR_LIST,cv.CV_CHAIN_APPROX_NONE) 
-   self.c = np.array([complex(i[1],i[0]) for i in s])
-  elif (type(fn) is np.ndarray):
+  if method == 'octave':
+   if type(fn) is str:
+    oc = Oct2Py()
+    im = oc.imread(fn)
+    s = oc.extract_longest_cont(im,128)
+    self.c = np.array([complex(i[0],i[1]) for i in s])
+   elif type(fn) is ndarray:
     self.c = fn
-  elif (type(fn) is cv.iplimage):
+  else:	
+   if type(fn) is str:
+    im = cv.LoadImage(fn,cv.CV_LOAD_IMAGE_GRAYSCALE)
+    s = cv.FindContours(im,cv.CreateMemStorage(),cv.CV_RETR_LIST,cv.CV_CHAIN_APPROX_NONE) 
+    self.c = np.array([complex(i[1],i[0]) for i in s])
+   elif (type(fn) is np.ndarray):
+    self.c = fn
+   elif (type(fn) is cv.iplimage):
     s = cv.FindContours(fn,cv.CreateMemStorage(),cv.CV_RETR_LIST,cv.CV_CHAIN_APPROX_NONE) 
     self.c = np.array([complex(i[1],i[0]) for i in s])
   N = self.c.size

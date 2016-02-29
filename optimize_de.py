@@ -40,7 +40,7 @@ if dataset == "" or fout == "" or len(conf) != 3 or dim <= 0:
  sys.exit(2)
 
 algo = "de"
-N,M = 500,15
+N,M = 300,15
 
 Head = {'algo':algo,'conf':" npop = {0}, pr = {1}, beta = {2}".format(conf[0],conf[1],conf[2]),'dim':dim,"dataset":dataset}
 
