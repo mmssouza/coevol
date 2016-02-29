@@ -11,7 +11,7 @@ nomes = cPickle.load(f).keys()
 f.close()
 pylab.figure(1)
 for fname in nomes:
- c = desc.contour_base(d+fname)
+ c = desc.contour_base(d+fname,method = 'octave')
  pylab.scatter(pylab.array([i.real for i in c]),pylab.array([i.imag for i in c]),s = 5)
  print fname
  pylab.savefig(dd+fname)

@@ -7,6 +7,11 @@ from scipy.interpolate import interp1d
 from scipy.spatial.distance import pdist,squareform
 from math import sqrt,acos
 from oct2py import Oct2Py
+import atexit
+
+oc = Oct2Py('/usr/bin/octave-cli')
+atexit.register(oc.exit)
+
 class contour_base:
  '''Represents an binary image contour as a complex discrete signal. 
    Some calculation methods are provided to compute contour 1st derivative, 2nd derivatives and perimeter.
@@ -15,13 +20,12 @@ class contour_base:
  
  '''
 
- def __init__(self,fn,method = 'cv'):
+ def __init__(self,fn,nc = 256,method = 'cv'):
   self.__i = 0
   if method == 'octave':
    if type(fn) is str:
-    oc = Oct2Py()
     im = oc.imread(fn)
-    s = oc.extract_longest_cont(im,128)
+    s = oc.extract_longest_cont(im,nc)
     self.c = np.array([complex(i[0],i[1]) for i in s])
    elif type(fn) is ndarray:
     self.c = fn
@@ -81,8 +85,8 @@ class contour(contour_base):
   def __G(self,s):
     return (1/(s*(2*np.pi)**0.5))*np.exp(-self.freq**2/(2*s**2))
   
-  def __init__(self,fn,sigma=None):
-   contour_base.__init__(self,fn)
+  def __init__(self,fn,sigma=None,nc = 256,method = 'cv'):
+   contour_base.__init__(self,fn,nc = nc,method = method)
    if sigma is not None:
     E = np.sum(self.ftc * self.ftc.conjugate())
     self.ftc = self.ftc * self.__G(sigma)

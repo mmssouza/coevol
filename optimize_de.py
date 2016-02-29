@@ -54,7 +54,7 @@ if __name__ == '__main__':
   with open(dataset+"/"+"names.pkl","r") as f:
    nomes = cPickle.load(f)
    for k in nomes:
-    cnt.append(desc.contour(dataset+"/"+k).c)
+    cnt.append(desc.contour(dataset+"/"+k,method = 'octave').c)
     Y.append(cl[k])
 	
  pool = Pool(processes=mt)

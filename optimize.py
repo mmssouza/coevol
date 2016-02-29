@@ -61,7 +61,7 @@ class sim_ann:
   
 class coevol:
 
- def __init__(self,challenge_func,ns = 10,npop1 = 40,pr = 0.3,beta = 0.5,npop2 = 100,w = 0.5,c1 = 2.01,c2 = 2.02):
+ def __init__(self,challenge_func,ns = 10,npop1 = 20,pr = 0.3,beta = 0.85,npop2 = 20,w = 0.7,c1 = 1.5,c2 = 1.5):
   # Tamanho das populacoes
   seed()
   self.ns = ns
@@ -115,7 +115,7 @@ class coevol:
     self.fit1[i] = self.avalia_aptidao1(self.ans1[i])		
     
   # inicializa velocidades iniciais do PSO
-  self.v = scipy.array([self.gera_individuo() for i in scipy.arange(self.npop2)])
+  self.v = scipy.zeros(self.pop2.shape)
   # guarda o melhor fitness de cada particula PSO 
   self.bfp = scipy.copy(self.pop2)
   self.bfp_fitness = scipy.copy(self.fit2)
@@ -133,12 +133,12 @@ class coevol:
 	
    
  def resolve_desafio(self,x):
-  for i in range(x.shape[0]):
-   if not 0.125 <= x[i] <= 125.125:
-    x[i] = 125.*rand()+0.125
-   #x[i] = 50. - 100.*rand()
-	
-  return (self.fc(x),x)
+   for i in range(Dim):
+    if x[i] < 0.125:
+      x[i] = 0.125
+    elif x[i] > 125.125:
+      x[i] = 125.125
+   return (self.fc(x),x)
   
  def avalia_aptidao2(self,x):
   cnt = 0
@@ -231,6 +231,11 @@ class coevol:
    self.v[i] = self.w*self.v[i] 
    self.v[i] = self.v[i] + self.c1*scipy.rand()*( self.bfp[i] - self.pop2[i]) 
    self.v[i] = self.v[i] + self.c2*scipy.rand()*(self.bfg - self.pop2[i])
+   for j in range(Dim):
+    if self.v[i][j] >= 22.6:
+     self.v[i][j] = 22.6
+    elif self.v[i][j] <= -22.6:
+     self.v[i][j] = -22.6   
    # Atualiza posicao
    self.pop2[i] = self.pop2[i] + self.v[i]   
    self.ans2[i],self.pop2[i] = self.resolve_desafio(self.pop2[i])
@@ -381,10 +386,10 @@ class pso:
    self.v[i] = self.v[i] + self.c1*scipy.rand()*( self.bfp[i] - self.pop[i]) 
    self.v[i] = self.v[i] + self.c2*scipy.rand()*(self.bfg - self.pop[i])
    for j in range(Dim):
-    if self.v[i][j] >= 12.6:
-     self.v[i][j] = 12.6
-    elif self.v[i][j] <= -12.6:
-     self.v[i][j] = -12.6
+    if self.v[i][j] >= 52.6:
+     self.v[i][j] = 52.6
+    elif self.v[i][j] <= -52.6:
+     self.v[i][j] = -52.6
    # Atualiza posicao
    self.pop[i] = self.pop[i] + self.v[i]
    

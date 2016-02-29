@@ -38,7 +38,7 @@ if dataset == "" or fout == "" or len(conf) != 4 or dim <= 0:
  sys.exit(2)
 
 algo = "pso"
-N,M = 500,15
+N,M = 300,15
 
 Head = {'algo':algo,'conf':"npop = {0}, w = {1}, c1 = {2}, c2 = {3}".format(conf[0],conf[1],conf[2],conf[3]),'dim':dim,"dataset":dataset}
 
