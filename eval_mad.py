@@ -9,17 +9,16 @@ import metrics
 db = cPickle.load(open(sys.argv[1]+"/classes.txt"))
 #names = cPickle.load(open(sys.argv[1]+"/names.pkl"))
 names = db.keys()
-scales = pylab.loadtxt("mean_scale_de.pkl")
-s1 = scales[0,0:11:2]
-s2 = scales[1,0:11:2]
-s3 = scales[2,0:11:2]
-X1 = pylab.array([pylab.log(descritores.bendenergy(sys.argv[1]+f,s1)()) for f in names])
-X2 = pylab.array([pylab.log(descritores.bendenergy(sys.argv[1]+f,s2)()) for f in names])
-X3 = pylab.array([pylab.log(descritores.bendenergy(sys.argv[1]+f,s3)()) for f in names])
+scales = pylab.loadtxt(sys.argv[2])
 
-Y = pylab.array([db[n] for n in names])
+X = [pylab.vstack(([db[f] for f in names],pylab.array([pylab.log(descritores.bendenergy(sys.argv[1]+f,s)()) for f in names]).T)).T for s in scales]
 
-print pylab.median(1.-metrics.silhouette(X1,Y-1))
-print pylab.median(1.-metrics.silhouette(X2,Y-1))
-print pylab.median(1.-metrics.silhouette(X3,Y-1))
+for x in X:
+ s = metrics.silhouette(x[:,1:],x[:,0].astype(int)-1)
+ print pylab.mean(s),pylab.std(s)
+
+for n,x in zip(['nmbe_pso.pkl','nmbe_de.pkl','nmbe_sa.pkl'],X): 
+ with open(n,"wb") as f:
+  cPickle.dump(dict(zip(names,x)),f)
+
 

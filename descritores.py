@@ -151,7 +151,7 @@ class curvatura:
 class bendenergy:
  ''' For a given binary image, computes the multiscale contour curvature bend energy descriptor'''
  
- def __init__(self,fn,scalen,nc = 256,method = 'cv'):
+ def __init__(self,fn,scale,nc = 256,method = 'cv'):
   self.__i = 0
   k = curvatura(fn,scale[::-1],nc = nc,method = method)
   # p = perimetro do contorno nao suavisado
