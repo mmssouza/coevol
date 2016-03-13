@@ -183,5 +183,3 @@ def ch(X,cIDX,dist='euclidean'):
  ssw=z.sum()
 
  return((ssb/(Nclusters-1))/(ssw/(Npoints-Nclusters))) 
-
-    

@@ -2,10 +2,15 @@
 # descritores : módulo que implementa o cálculo de assinaturas e descritores de imagens
 
 import numpy as np
-import cv
+import cv,cv2
 from scipy.interpolate import interp1d 
 from scipy.spatial.distance import pdist,squareform
 from math import sqrt,acos
+from oct2py import Oct2Py
+import atexit
+
+oc = Oct2Py('/usr/bin/octave-cli')
+atexit.register(oc.exit)
 
 class contour_base:
  '''Represents an binary image contour as a complex discrete signal. 
@@ -15,16 +20,23 @@ class contour_base:
  
  '''
 
- def __init__(self,fn):
-
+ def __init__(self,fn,nc = 256,method = 'cv'):
   self.__i = 0
-  if type(fn) is str:
-   im = cv.LoadImage(fn,cv.CV_LOAD_IMAGE_GRAYSCALE)
-   s = cv.FindContours(im,cv.CreateMemStorage(),cv.CV_RETR_LIST,cv.CV_CHAIN_APPROX_NONE) 
-   self.c = np.array([complex(i[1],i[0]) for i in s])
-  elif (type(fn) is np.ndarray):
+  if method == 'octave':
+   if type(fn) is str:
+    im = oc.imread(fn)
+    s = oc.extract_longest_cont(im,nc)
+    self.c = np.array([complex(i[0],i[1]) for i in s])
+   elif type(fn) is ndarray:
     self.c = fn
-  elif (type(fn) is cv.iplimage):
+  else:	
+   if type(fn) is str:
+    im = cv.LoadImage(fn,cv.CV_LOAD_IMAGE_GRAYSCALE)
+    s = cv.FindContours(im,cv.CreateMemStorage(),cv.CV_RETR_LIST,cv.CV_CHAIN_APPROX_NONE) 
+    self.c = np.array([complex(i[1],i[0]) for i in s])
+   elif (type(fn) is np.ndarray):
+    self.c = fn
+   elif (type(fn) is cv.iplimage):
     s = cv.FindContours(fn,cv.CreateMemStorage(),cv.CV_RETR_LIST,cv.CV_CHAIN_APPROX_NONE) 
     self.c = np.array([complex(i[1],i[0]) for i in s])
   N = self.c.size
@@ -73,8 +85,8 @@ class contour(contour_base):
   def __G(self,s):
     return (1/(s*(2*np.pi)**0.5))*np.exp(-self.freq**2/(2*s**2))
   
-  def __init__(self,fn,sigma=None):
-   contour_base.__init__(self,fn)
+  def __init__(self,fn,sigma=None,nc = 256,method = 'cv'):
+   contour_base.__init__(self,fn,nc = nc,method = method)
    if sigma is not None:
     E = np.sum(self.ftc * self.ftc.conjugate())
     self.ftc = self.ftc * self.__G(sigma)
@@ -98,11 +110,11 @@ class contour(contour_base):
 class curvatura:
   '''For a given binary image calculates and yields a family of curvature signals represented in a two dimensional ndarray structure; each row corresponds to the curvature signal derived from the smoothed contour for a certain smooth level.'''
 
-  def __Calcula_Curvograma(self,fn):
+  def __Calcula_Curvograma(self,fn,nc = 256,method = 'cv'):
    if type(fn) is contour:
     z = fn
    else:
-    z = contour(fn)
+    z = contour(fn,nc = nc,method = method)
    caux = [contour(z(),s) for s in self.sigmas]
    caux.append(z)
    self.contours = np.array(caux)
@@ -118,10 +130,10 @@ class curvatura:
      self.curvs[i] = curv 
  
   # Contructor 
-  def __init__(self,fn = None,sigma_range = np.linspace(2,30,20)):
+  def __init__(self,fn = None,sigma_range = np.linspace(2,30,20),nc = 256,method = 'cv'):
    # Extrai contorno da imagem
    self.sigmas = sigma_range
-   self.__Calcula_Curvograma(fn)
+   self.__Calcula_Curvograma(fn,nc = nc,method = method)
 
  # Function to compute curvature
  # It is called into class constructor
@@ -139,9 +151,9 @@ class curvatura:
 class bendenergy:
  ''' For a given binary image, computes the multiscale contour curvature bend energy descriptor'''
  
- def __init__(self,fn,scale):
+ def __init__(self,fn,scale,nc = 256,method = 'cv'):
   self.__i = 0
-  k = curvatura(fn,scale[::-1])
+  k = curvatura(fn,scale[::-1],nc = nc,method = method)
   # p = perimetro do contorno nao suavisado
   p = k.contours[-1].perimeter() 
   self.phi  = np.array([(p**2)*np.mean(k(i)**2) for i in np.arange(0,scale.size)])
@@ -159,42 +171,65 @@ class bendenergy:
     self.__i += 1
     return self.phi[self.__i-1]
 
-class areaintegralinvariant:
+# Area integral invariant signature
+def aii(name,r,white_bg = False):
+ im = cv2.imread(name,0)
+# Caso imagem seja fundo branco
+ if white_bg:
+  im = cv2.bitwise_not(im)
+  
+ im_aux = np.zeros((im.shape[0]+4*r,im.shape[1]+4*r),dtype=im.dtype)
+ im_aux[2*r:im_aux.shape[0]-2*r,2*r:im_aux.shape[1]-2*r] = im
+ im = im_aux.copy()
+ cnt,h = cv2.findContours(im_aux,cv2.RETR_LIST,cv2.CHAIN_APPROX_NONE)
+ l = []
+ for a in cnt[0]:
+  c = a[0][0],a[0][1]
+  aux = np.zeros(im.shape,dtype = im.dtype)
+  cv2.circle(aux,c,r,255,-1)
+  aux2 = cv2.bitwise_and(aux,im)
+  cnt2,h = cv2.findContours(aux2,cv2.RETR_LIST,cv2.CHAIN_APPROX_NONE)
+  area = 0
+  for c in cnt2:
+   area = area + cv2.contourArea(c)
+  l.append(area)
 
- def __init__(self,fn,raio,sigma,n):
-  self.r = raio
-  t = np.linspace(0,1,n)
-  k = curvatura(fn,np.linspace(sigma,sigma,1))
-  self.ir = np.ndarray((t.size),dtype="double")
-  self.ir = 2*self.r**2*np.arccos(self.r*k(0,t)/2)
+ return np.array(l)
+
+#class areaintegralinvariant:
+
+# def __init__(self,fn,raio,sigma,n):
+#  self.r = raio
+#  t = np.linspace(0,1,n)
+#  k = curvatura(fn,np.linspace(sigma,sigma,1))
+#  self.ir = np.ndarray((t.size),dtype="double")
+#  self.ir = 2*self.r**2*np.arccos(self.r*k(0,t)/2)
  
- def __call__(self): return (self.ir)
+# def __call__(self): return (self.ir)
 
-def dii(fn,raio):
+# Distance integral invariant
+def dii(fn,raio,nc = 256,method = 'cv'):
   r = raio
-  c = contour_base(fn)
+  c = contour_base(fn,nc = nc,method = method)
   aux = np.vstack([c.c.real,c.c.imag]).T
   d = squareform(pdist(aux))
   return np.array([x[np.nonzero(x <= r)].sum() for x in d])
  
-def cd(fn):
-  img_c = contour_base(fn)
+# Centroid distance signature
+def cd(fn,nc = 256,method = 'cv'):
+  img_c = contour_base(fn,nc = nc,method = method)
   # Calcula distância ao centróide
   dc = np.abs((img_c()-img_c().mean()))
   # m = maior distancia do contorno ao centroide
   m = np.max(dc)
-  m = np.nonzero(dc == m)[0][0]
-  # rearranja vetor a partir da maior distancia 
-  # e normaliza valores
-  dc = np.r_[dc[m:],dc[0:m-1]]/float(dc[m])
-  return dc
+  return dc/m
 
 # Angle sequence shape signature
-class angle_seq_signature:
+class ass:
 
- def __init__(self,fn,raio):
+ def __init__(self,fn,raio,nc = 256,method = 'cv'):
   r = raio
-  cont = contour_base(fn).c
+  cont = contour_base(fn,nc = nc,method = method).c
   N = cont.shape[0]
   low = cont[0:r].copy()
   high = cont[N-r:N].copy()
@@ -247,12 +282,11 @@ class TAS:
   for i in np.arange(ts,self.N+ts):
    a = 0.5*(c[i].real*(c[i+ts]-c[i-ts]).imag + c[i+ts].real*(c[i-ts]-c[i]).imag + c[i-ts].real*(c[i]-c[i+ts]).imag)
    ta.append(a)
-  ta = np.array(ta)
-  ta = ta/np.abs(ta).max()
+   ta = ta/np.abs(ta).max()
   return ta
 
- def __init__(self,fn):
-  cont = contour_base(fn).c
+ def __init__(self,fn,nc = 256, method = 'cv'):
+  cont = contour_base(fn,nc = nc,method = method).c
   self.N = cont.shape[0]
   print fn,self.N
   Ts = np.floor((self.N-1)/2)
@@ -264,3 +298,9 @@ class TAS:
   for a in t[1:]:
    acum = acum + a
   self.sig = np.array(acum)/float(Ts)
+
+def fTAS(fn,nc='256'):
+   im = oc.imread(fn)
+   mc  = oc.extract_longest_cont(im,nc)
+   vtas =oc.ftas(mc.T())
+   return vtas.T()

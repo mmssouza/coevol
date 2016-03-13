@@ -3,7 +3,7 @@ import sys
 import scipy
 import math
 import numpy as np
-from numpy.random import random_integers,rand,permutation
+from numpy.random import seed,random_integers,rand,permutation
 
 Dim = 3
 
@@ -14,6 +14,7 @@ def set_dim(d):
 class sim_ann:
 
  def __init__(self,f,s0,T0,alpha,P,L):
+  seed()
   self.s = s0
   self.T = T0
   self.P = P
@@ -59,9 +60,10 @@ class sim_ann:
   self.T = self.alpha*self.T
   
 class coevol:
-
- def __init__(self,challenge_func,ns = 10,npop1 = 40,pr = 0.3,beta = 0.5,npop2 = 100,w = 0.5,c1 = 2.01,c2 = 2.02):
+ arg_lim = [(5., 100.),(0.,.2),(.6,1.),(30,512)]
+ def __init__(self,challenge_func,ns = 10,npop1 = 20,pr = 0.3,beta = 0.85,npop2 = 20,w = 0.7,c1 = 1.5,c2 = 1.5):
   # Tamanho das populacoes
+  seed()
   self.ns = ns
   self.npop1 = npop1
   self.npop2 = npop2
@@ -113,7 +115,7 @@ class coevol:
     self.fit1[i] = self.avalia_aptidao1(self.ans1[i])		
     
   # inicializa velocidades iniciais do PSO
-  self.v = scipy.array([self.gera_individuo() for i in scipy.arange(self.npop2)])
+  self.v = scipy.zeros(self.pop2.shape)
   # guarda o melhor fitness de cada particula PSO 
   self.bfp = scipy.copy(self.pop2)
   self.bfp_fitness = scipy.copy(self.fit2)
@@ -126,18 +128,21 @@ class coevol:
 
  def gera_individuo(self):
   l = []
-  l.append(random_integers(3,200))
-  l.append(0.1+ 0.2*rand())
-  l.append(0.6+0.4*rand())
+  l.append(random_integers(self.arg_lim[0][0],self.arg_lim[0][1]))
+  l.append(self.arg_lim[1][0]+ (self.arg_lim[1][1] - self.arg_lim[1][0])*rand())
+  l.append(self.arg_lim[2][0]+ (self.arg_lim[2][1] - self.arg_lim[2][0])*rand())
+  l.append(random_integers(self.arg_lim[3][0],self.arg_lim[3][1]))
   return np.array(l)	
    
  def resolve_desafio(self,x):
-    if not 3 <= x[0] <= 200:
-       x[0] = random_integers(3,200)
-    if not 0. <= x[1] <= .3:
-      x[1] = 0.1+0.2*rand()
-    if not 0.6 <= x[2] <= 1.:
-      x[2] = 0.6+0.4*rand()
+    if not self.arg_lim[0][0] <= x[0] <= self.arg_lim[0][1]:
+      x[0] = random_integers(self.arg_lim[0][0],self.arg_lim[0][1])
+    if not self.arg_lim[1][0] <= x[1] <= self.arg_lim[1][1]:
+      x[1] = self.arg_lim[1][0]+ (self.arg_lim[1][1] - self.arg_lim[1][0])*rand()
+    if not self.arg_lim[2][0] <= x[2] <= self.arg_lim[2][1]:
+      x[2] = self.arg_lim[2][0]+ (self.arg_lim[2][1] - self.arg_lim[2][0])*rand()
+    if not self.arg_lim[3][0] <= x[3] <= self.arg_lim[3][1]:
+      x[0] = random_integers(self.arg_lim[3][0],self.arg_lim[3][1])
     return (self.fc(x),x)
   
  def avalia_aptidao2(self,x):
@@ -230,6 +235,12 @@ class coevol:
    self.v[i] = self.w*self.v[i] 
    self.v[i] = self.v[i] + self.c1*scipy.rand()*( self.bfp[i] - self.pop2[i]) 
    self.v[i] = self.v[i] + self.c2*scipy.rand()*(self.bfg - self.pop2[i])
+   for j in range(self.v.shape[1]):
+    if self.v[i][j] >= self.arg_lim[j][1]/2:
+     self.v[i][j] = self.arg_lim[j][1]/2
+    elif self.v[i][j] <= -self.arg_lim[j][1]/2:
+     self.v[i][j] = -self.arg_lim[j][1]/2
+  
    # Atualiza posicao
    self.pop2[i] = self.pop2[i] + self.v[i]   
    self.ans2[i],self.pop2[i] = self.resolve_desafio(self.pop2[i])
@@ -258,6 +269,7 @@ class coevol:
 class de:
 
  def __init__(self,fitness_func,npop = 10,pr = 0.7,beta = 2.5,debug=False):
+  seed()
   self.ns = npop
   self.beta = beta
   self.pr  = pr 
@@ -340,6 +352,7 @@ class de:
 class pso:
 
  def __init__(self,fitness_func,npop = 20,w = 0.5,c1 = 2.01,c2 = 2.02,debug = False):
+  seed()
   self.debug = debug
   self.c1 = c1
   self.c2 = c2
@@ -355,7 +368,7 @@ class pso:
    self.fit[i],self.pop[i] = self.avalia_aptidao(self.pop[i])  
    
   # inicializa velocidades iniciais
-  self.v = scipy.array([self.gera_individuo() for i in scipy.arange(self.ns)])
+  self.v = scipy.zeros((self.ns,Dim))
   # guarda a melhor posicao de cada particula 
   self.bfp = scipy.copy(self.pop)
   self.bfp_fitness = scipy.copy(self.fit)
@@ -383,9 +396,15 @@ class pso:
  
   for i in scipy.arange(self.ns):
    # Atualiza velocidade
+   
    self.v[i] = self.w*self.v[i] 
    self.v[i] = self.v[i] + self.c1*scipy.rand()*( self.bfp[i] - self.pop[i]) 
    self.v[i] = self.v[i] + self.c2*scipy.rand()*(self.bfg - self.pop[i])
+   for j in range(Dim):
+    if self.v[i][j] >= 52.6:
+     self.v[i][j] = 52.6
+    elif self.v[i][j] <= -52.6:
+     self.v[i][j] = -52.6
    # Atualiza posicao
    self.pop[i] = self.pop[i] + self.v[i]
    
