@@ -13,9 +13,19 @@ def set_dim(d):
 
 class sim_ann:
 
- def __init__(self,f,s0,T0,alpha,P,L):
+ arg_lim = [(5., 100.),(-1.,0.),(.5,1.),(30,512)]
+
+ def __gera_s0(self):
+  l = []
+  l.append(random_integers(self.arg_lim[0][0],self.arg_lim[0][1]))
+  l.append(self.arg_lim[1][0]+ (self.arg_lim[1][1] - self.arg_lim[1][0])*rand())
+  l.append(self.arg_lim[2][0]+ (self.arg_lim[2][1] - self.arg_lim[2][0])*rand())
+  l.append(random_integers(self.arg_lim[3][0],self.arg_lim[3][1]))
+  return scipy.array(l)
+
+ def __init__(self,f,T0,alpha,P,L):
   seed()
-  self.s = s0
+  self.s = self.__gera_s0()
   self.T = T0
   self.P = P
   self.L = L
@@ -31,7 +41,7 @@ class sim_ann:
    if scipy.rand() < 0.3:
     aux = x[i]
     x[i] = x[i] + 0.6*x[i]*(1+f)*scipy.randn()
-    if not (0.125 <= x[i] <= 125.125):
+    if not (self.arg_lim[i][0] <= x[i] <= self.arg_lim[i][1]):
 	 x[i] = aux
   return x
   
@@ -267,7 +277,7 @@ class coevol:
    self.HF2_Updt(self.bfg_ans,self.bfg)
    
 class de:
-
+ arg_lim = [(5., 150.),(0.,.2),(.6,1.),(32,512)]
  def __init__(self,fitness_func,npop = 10,pr = 0.7,beta = 2.5,debug=False):
   seed()
   self.ns = npop
@@ -283,21 +293,25 @@ class de:
    #print i,self.fit[i]
    self.pop.append(aux.copy())
   self.pop = scipy.array(self.pop)
- 
+
  def gera_individuo(self):
   l = []
-  l.append(random_integers(3,200))
-  l.append(0.1+ 0.2*rand())
-  l.append(0.6+0.4*rand())
-  return np.array(l)
-
+  l.append(random_integers(self.arg_lim[0][0],self.arg_lim[0][1]))
+  l.append(self.arg_lim[1][0]+ (self.arg_lim[1][1] - self.arg_lim[1][0])*rand())
+  l.append(self.arg_lim[2][0]+ (self.arg_lim[2][1] - self.arg_lim[2][0])*rand())
+  l.append(random_integers(self.arg_lim[3][0],self.arg_lim[3][1]))
+  return np.array(l)	
+   
  def avalia_aptidao(self,x):
-    if not 3 <= x[0] <= 200:
-       x[0] = random_integers(3,200)
-    if not 0. <= x[1] <= .3:
-      x[1] = 0.1+0.2*rand()
-    if not 0.6 <= x[2] <= 1.:
-      x[2] = 0.6+0.4*rand()
+    if not self.arg_lim[0][0] <= x[0] <= self.arg_lim[0][1]:
+      x[0] = random_integers(self.arg_lim[0][0],self.arg_lim[0][1])
+    if not self.arg_lim[1][0] <= x[1] <= self.arg_lim[1][1]:
+      x[1] = self.arg_lim[1][0]+ (self.arg_lim[1][1] - self.arg_lim[1][0])*rand()
+    if not self.arg_lim[2][0] <= x[2] <= self.arg_lim[2][1]:
+      x[2] = self.arg_lim[2][0]+ (self.arg_lim[2][1] - self.arg_lim[2][0])*rand()
+    if not self.arg_lim[3][0] <= x[3] <= self.arg_lim[3][1]:
+      x[3] = random_integers(self.arg_lim[3][0],self.arg_lim[3][1])
+   
     return (self.fitness_func(x),x)
   
  def run(self):  

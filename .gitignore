@@ -2,4 +2,5 @@
 *.py~
 *.txt
 *.pkl
+octave-core
 octave-workspace

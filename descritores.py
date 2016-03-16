@@ -27,7 +27,7 @@ class contour_base:
     im = oc.imread(fn)
     s = oc.extract_longest_cont(im,nc)
     self.c = np.array([complex(i[0],i[1]) for i in s])
-   elif type(fn) is ndarray:
+   elif type(fn) is np.ndarray:
     self.c = fn
   else:	
    if type(fn) is str:
@@ -282,13 +282,13 @@ class TAS:
   for i in np.arange(ts,self.N+ts):
    a = 0.5*(c[i].real*(c[i+ts]-c[i-ts]).imag + c[i+ts].real*(c[i-ts]-c[i]).imag + c[i-ts].real*(c[i]-c[i+ts]).imag)
    ta.append(a)
-   ta = ta/np.abs(ta).max()
+  ta = np.array(ta)
+  ta = ta/np.abs(ta).max()
   return ta
-
+  
  def __init__(self,fn,nc = 256, method = 'cv'):
   cont = contour_base(fn,nc = nc,method = method).c
   self.N = cont.shape[0]
-  print fn,self.N
   Ts = np.floor((self.N-1)/2)
   t = []
   for ts in np.arange(1,Ts):
