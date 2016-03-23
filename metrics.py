@@ -1,7 +1,7 @@
 import numpy as np
 from scipy.spatial.distance import pdist,squareform,euclidean
 
-def silhouette(X, cIDX):
+def silhouette(X, cIDX,distance = "euclidean"):
     """
     Computes the silhouette score for each instance of a clustered dataset,
     which is defined as:
@@ -21,7 +21,7 @@ def silhouette(X, cIDX):
     K = len(np.unique(cIDX))    # number of clusters
 
     # compute pairwise distance matrix
-    D = squareform(pdist(X))
+    D = squareform(pdist(X,metric = distance))
 
     # indices belonging to each cluster
     kIndices = [np.flatnonzero(cIDX==k) for k in range(K)]

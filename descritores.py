@@ -9,7 +9,7 @@ from math import sqrt,acos
 from oct2py import Oct2Py
 import atexit
 
-oc = Oct2Py('/usr/bin/octave-cli')
+oc = Oct2Py('C:\\Octave\\Octave-4.0.0\\bin\\octave-cli')
 atexit.register(oc.exit)
 
 class contour_base:
@@ -27,7 +27,7 @@ class contour_base:
     im = oc.imread(fn)
     s = oc.extract_longest_cont(im,nc)
     self.c = np.array([complex(i[0],i[1]) for i in s])
-   elif type(fn) is np.ndarray:
+   else:
     self.c = fn
   else:	
    if type(fn) is str:

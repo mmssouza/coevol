@@ -13,14 +13,13 @@ def set_dim(d):
 
 class sim_ann:
 
- arg_lim = [(5., 100.),(-1.,0.),(.5,1.),(30,512)]
+ arg_lim = [(5., 100.),(-1.,0.),(.5,1.)]
 
  def __gera_s0(self):
   l = []
   l.append(random_integers(self.arg_lim[0][0],self.arg_lim[0][1]))
   l.append(self.arg_lim[1][0]+ (self.arg_lim[1][1] - self.arg_lim[1][0])*rand())
   l.append(self.arg_lim[2][0]+ (self.arg_lim[2][1] - self.arg_lim[2][0])*rand())
-  l.append(random_integers(self.arg_lim[3][0],self.arg_lim[3][1]))
   return scipy.array(l)
 
  def __init__(self,f,T0,alpha,P,L):
