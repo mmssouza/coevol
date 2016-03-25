@@ -11,10 +11,7 @@ import amostra_base
 from functools import partial
 import rpyc
 
-rpyc.core.protocol.DEFAULT_CONFIG['allow_pickle'] = True
-
-conn1 = rpyc.connect("10.0.0.20", 18871)
-bgsrv1 = rpyc.BgServingThread(conn1)  
+rpyc.core.protocol.DEFAULT_CONFIG['allow_pickle'] = True  
 
 mt = 1
 dataset = ""
