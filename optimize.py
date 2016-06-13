@@ -1,6 +1,8 @@
 
 import sys
+import os
 import scipy
+import cPickle
 import math
 import numpy as np
 from numpy.random import seed,random_integers,rand,permutation
@@ -12,15 +14,28 @@ def set_dim(d):
  setattr(sys.modules[__name__],"Dim",d)
 
 class sim_ann:
+ def __gera_s0(self):
+  return scipy.array([.125+125.*rand() for i in range(Dim)]) 
 
- def __init__(self,f,s0,T0,alpha,P,L):
+ def __init__(self,f,T0,alpha,P,L):
   seed()
-  self.s = s0
-  self.T = T0
+  self.f = f
+  if os.path.isfile("dump_sim_ann.pkl"):
+   dump_fd = open("dump_sim_ann.pkl",'r')
+   self.s = cPickle.load(dump_fd)
+   self.T = cPickle.load(dump_fd)
+   self.fit = cPickle.load(dump_fd)
+   self.hall_of_fame = cPickle.load(dump_fd)
+  else:
+   self.s = self.__gera_s0()
+   self.T = T0
+   self.fit = self.f(self.s)
+   self.hall_of_fame = []   
+   for i in scipy.arange(15):
+    self.hall_of_fame.insert(0,scipy.hstack((self.fit,self.s)))
   self.P = P
   self.L = L
   self.alpha = alpha
-  self.f = f
   self.fit = self.f(self.s)
   self.hall_of_fame = []   
   for i in scipy.arange(15):
@@ -58,7 +73,13 @@ class sim_ann:
 	  self.hall_of_fame.pop()   
 	break
   self.T = self.alpha*self.T
-  
+  dump_fd = open("dump_sim_ann.pkl","wb")
+  cPickle.dump(self.s,dump_fd)
+  cPickle.dump(self.T,dump_fd)
+  cPickle.dump(self.fit,dump_fd)
+  cPickle.dump(self.hall_of_fame,dump_fd)
+  dump_fd.close()
+
 class coevol:
 
  def __init__(self,challenge_func,ns = 10,npop1 = 20,pr = 0.3,beta = 0.85,npop2 = 20,w = 0.7,c1 = 1.5,c2 = 1.5):
@@ -270,14 +291,18 @@ class de:
   self.pr  = pr 
   self.debug = debug
   self.fitness_func = fitness_func
-  self.fit = scipy.zeros((self.ns,1))
-  self.pop = []
-  # avalia fitness de toda populacao
-  for i in scipy.arange(self.ns):
-   self.fit[i],aux = self.avalia_aptidao(self.gera_individuo())
-   #print i,self.fit[i]
-   self.pop.append(aux.copy())
-  self.pop = scipy.array(self.pop)
+  if os.path.isfile("dump_de.pkl"):
+   dump_fd = open("dump_de.pkl",'r')
+   self.fit = cPickle.load(dump_fd)
+   self.pop = cPickle.load(dump_fd)
+  else:
+   self.fit = scipy.zeros((self.ns,1))
+   self.pop = []
+   # avalia fitness de toda populacao
+   for i in scipy.arange(self.ns):
+    self.fit[i],aux = self.avalia_aptidao(self.gera_individuo())
+    self.pop.append(aux.copy())
+   self.pop = scipy.array(self.pop)
  
  def gera_individuo(self):
   #return 50. - 100.*rand(Dim)
@@ -334,6 +359,11 @@ class de:
     self.pop[i] = c
     self.fit[i] = c_fit
 
+  dump_fd = open("dump_de.pkl","wb")
+  cPickle.dump(self.fit,dump_fd)
+  cPickle.dump(self.pop,dump_fd)
+  dump_fd.close()
+ 
   # avalia fitness da nova populacao
 #  for i in scipy.arange(self.ns):
 #   self.fit[i],self.pop[i] = self.avalia_aptidao(self.pop[i]) 
@@ -346,24 +376,32 @@ class pso:
   self.c1 = c1
   self.c2 = c2
   self.w = w
-  self.ns = npop
+  self.ns = npop 
+  self.fitness_func = fitness_func  
   # gera pop inicial
-  # centroides dos Kmax agrupamentos 
-  self.pop = scipy.array([self.gera_individuo() for i in scipy.arange(self.ns)])
-  self.fitness_func = fitness_func
-  self.fit = scipy.zeros(self.ns)
-  # avalia fitness de toda populacao
-  for i in scipy.arange(self.ns):
-   self.fit[i],self.pop[i] = self.avalia_aptidao(self.pop[i])  
-   
-  # inicializa velocidades iniciais
-  self.v = scipy.zeros((self.ns,Dim))
-  # guarda a melhor posicao de cada particula 
-  self.bfp = scipy.copy(self.pop)
-  self.bfp_fitness = scipy.copy(self.fit)
-  # guarda a melhor posicao global
-  self.bfg = self.pop[self.bfp_fitness.argmin()].copy()
-  self.bfg_fitness = self.bfp_fitness.min().copy()
+  if os.path.isfile("dump_pso.pkl"):
+   dump_fd = open("dump_pso.pkl",'r')
+   self.pop = cPickle.load(dump_fd)
+   self.fit = cPickle.load(dump_fd)
+   self.v = cPickle.load(dump_fd)
+   self.bfg = cPickle.load(dump_fd)
+   self.bfg_fitness = cPickle.load(dump_fd)
+   self.bfp = cPickle.load(dump_fd)
+   self.bfp_fitness  = cPickle.load(dump_fd)
+  else:
+   self.pop = scipy.array([self.gera_individuo() for i in scipy.arange(self.ns)])
+   self.fit = scipy.zeros(self.ns)
+   # avalia fitness de toda populacao
+   for i in scipy.arange(self.ns):
+    self.fit[i],self.pop[i] = self.avalia_aptidao(self.pop[i])  
+   # inicializa velocidades iniciais
+   self.v = scipy.zeros((self.ns,Dim))
+   # guarda a melhor posicao de cada particula 
+   self.bfp = scipy.copy(self.pop)
+   self.bfp_fitness = scipy.copy(self.fit)
+   # guarda a melhor posicao global
+   self.bfg = self.pop[self.bfp_fitness.argmin()].copy()
+   self.bfg_fitness = self.bfp_fitness.min().copy()
 
  def gera_individuo(self):
   return 125*rand(Dim)+0.125
@@ -386,10 +424,10 @@ class pso:
    self.v[i] = self.v[i] + self.c1*scipy.rand()*( self.bfp[i] - self.pop[i]) 
    self.v[i] = self.v[i] + self.c2*scipy.rand()*(self.bfg - self.pop[i])
    for j in range(Dim):
-    if self.v[i][j] >= 52.6:
-     self.v[i][j] = 52.6
-    elif self.v[i][j] <= -52.6:
-     self.v[i][j] = -52.6
+    if self.v[i][j] >= 5.6:
+     self.v[i][j] = 5.6
+    elif self.v[i][j] <= -5.6:
+     self.v[i][j] = -5.6
    # Atualiza posicao
    self.pop[i] = self.pop[i] + self.v[i]
    
@@ -405,6 +443,15 @@ class pso:
    if  self.bfp_fitness[i] < self.bfg_fitness:
     self.bfg_fitness = self.bfp_fitness[i].copy()
     self.bfg = self.bfp[i].copy()
+  dump_fd = open("dump_pso.pkl","wb")
+  cPickle.dump(self.pop,dump_fd)
+  cPickle.dump(self.fit,dump_fd)
+  cPickle.dump(self.v,dump_fd) 
+  cPickle.dump(self.bfg,dump_fd)
+  cPickle.dump(self.bfg_fitness,dump_fd)
+  cPickle.dump(self.bfp,dump_fd)
+  cPickle.dump(self.bfp_fitness,dump_fd)
+  dump_fd.close()
 
 #######################
 ## Some Benchmark functions #

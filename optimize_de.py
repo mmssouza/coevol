@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 
 import sys
+import os
 import getopt
 import optimize 
 import scipy
@@ -40,6 +41,16 @@ if dataset == "" or fout == "" or len(conf) != 3 or dim <= 0:
  sys.exit(2)
 
 algo = "de"
+has_dump_file = False
+if os.path.isfile("dump_optimize_de.pkl"):
+ has_dump_file = True
+ dump_fd = open("dump_optimize_de.pkl","r")
+ nn = cPickle.load(dump_fd)
+ mm = cPickle.load(dump_fd)
+else:
+ nn = 0
+ mm = 0  
+
 N,M = 300,15
 
 Head = {'algo':algo,'conf':" npop = {0}, pr = {1}, beta = {2}".format(conf[0],conf[1],conf[2]),'dim':dim,"dataset":dataset}
@@ -54,7 +65,7 @@ if __name__ == '__main__':
   with open(dataset+"/"+"names.pkl","r") as f:
    nomes = cPickle.load(f)
    for k in nomes:
-    cnt.append(desc.contour(dataset+"/"+k,method = 'octave').c)
+    cnt.append(desc.contour(dataset+"/"+k).c)
     Y.append(cl[k])
 	
  pool = Pool(processes=mt)
@@ -66,15 +77,23 @@ if __name__ == '__main__':
   return np.median(np.abs(1.-s))
 
  optimize.set_dim(dim)
-
- with open(fout,"wb") as f:
+   
+ with open(fout,"ab",0) as f:
   cPickle.dump(Head,f)
   cPickle.dump((N,M),f)
-  for j in range(M):
+  if not has_dump_file:
+   cPickle.dump(Head,f)
+   cPickle.dump((N,M),f)
+  for j in range(mm,M):
    v = optimize.de(cost_func,conf[0],conf[1],conf[2])
-   for i in range(N):
+   for i in range(nn,N):
     v.run()
+    dump_fd = open("dump_optimize_de.pkl","wb")
+    cPickle.dump(i+1,dump_fd)
+    cPickle.dump(j,dump_fd)
+    dump_fd.close()
     print i,v.fit.min()
     print v.pop[v.fit.argmin()]
     cPickle.dump([i,v.fit.min(),v.pop[v.fit.argmin()]],f)
-   print "############################################"
+   nn = 0 
+
