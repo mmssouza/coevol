@@ -33,8 +33,8 @@ class sim_ann:
    self.hall_of_fame = []   
    for i in scipy.arange(15):
     self.hall_of_fame.insert(0,scipy.hstack((self.fit,self.s)))
-  self.P = P
-  self.L = L
+  self.P = int(P)
+  self.L = int(L)
   self.alpha = alpha
   self.fit = self.f(self.s)
   self.hall_of_fame = []   
@@ -286,7 +286,7 @@ class de:
 
  def __init__(self,fitness_func,npop = 10,pr = 0.7,beta = 2.5,debug=False):
   seed()
-  self.ns = npop
+  self.ns = int(npop)
   self.beta = beta
   self.pr  = pr 
   self.debug = debug
@@ -376,7 +376,7 @@ class pso:
   self.c1 = c1
   self.c2 = c2
   self.w = w
-  self.ns = npop 
+  self.ns = int(npop) 
   self.fitness_func = fitness_func  
   # gera pop inicial
   if os.path.isfile("dump_pso.pkl"):
@@ -424,10 +424,10 @@ class pso:
    self.v[i] = self.v[i] + self.c1*scipy.rand()*( self.bfp[i] - self.pop[i]) 
    self.v[i] = self.v[i] + self.c2*scipy.rand()*(self.bfg - self.pop[i])
    for j in range(Dim):
-    if self.v[i][j] >= 5.6:
-     self.v[i][j] = 5.6
-    elif self.v[i][j] <= -5.6:
-     self.v[i][j] = -5.6
+    if self.v[i][j] >= 25.6:
+     self.v[i][j] = 25.6
+    elif self.v[i][j] <= -25.6:
+     self.v[i][j] = -25.6
    # Atualiza posicao
    self.pop[i] = self.pop[i] + self.v[i]
    
@@ -435,7 +435,7 @@ class pso:
    
    # Atualiza melhor posicao da particula
    if self.fit[i] < self.bfp_fitness[i]:
-    self.bfp[i] = self.pop[i]
+    self.bfp[i] = self.pop[i].copy()
     self.bfp_fitness[i] = self.fit[i]
    if self.debug:
     print "self.fit[{0}] = {1} bfp_fitness = {2}".format(i,self.fit[i],self.bfp_fitness[i])

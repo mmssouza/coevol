@@ -79,8 +79,6 @@ if __name__ == '__main__':
  optimize.set_dim(dim)
    
  with open(fout,"ab",0) as f:
-  cPickle.dump(Head,f)
-  cPickle.dump((N,M),f)
   if not has_dump_file:
    cPickle.dump(Head,f)
    cPickle.dump((N,M),f)
@@ -96,4 +94,5 @@ if __name__ == '__main__':
     print v.pop[v.fit.argmin()]
     cPickle.dump([i,v.fit.min(),v.pop[v.fit.argmin()]],f)
    nn = 0 
+   os.remove("dump_de.pkl")
 

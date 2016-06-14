@@ -84,9 +84,12 @@ if __name__ == '__main__':
    u = optimize.pso(cost_func,npop =conf[0],w = conf[1],c1 = conf[2],c2 = conf[3])
    for i in range(nn,N):
     u.run()
+    dump_fd = open("dump_optimize_pso.pkl","wb")
     cPickle.dump(i+1,dump_fd)
     cPickle.dump(j,dump_fd)
+    dump_fd.close()
     print i,u.bfg_fitness
     print u.bfg
     cPickle.dump([i,u.bfg_fitness,u.bfg],f)
+   os.remove("dump_pso.pkl")
    nn = 0
