@@ -1,0 +1,1 @@
+optimize_pso.py --dim 5 -o pso_teste.pkl 40 .75 1.5 1.5 2.5 2.
