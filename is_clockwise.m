@@ -33,7 +33,7 @@ else
 	Xs	= round(X+1.5*sins);
 	Ys	= round(Y-1.5*coss);
 	[nRow,nCol]	= size(fg_mask);
-	id_gd		= find(Xs>0 & Xs<=nCol & Ys>0 & Ys<=nRow);
+	id_gd		= find(Xs>0 && Xs<=nCol && Ys>0 && Ys<=nRow);
 	
 	Xs	= Xs(id_gd);
 	Ys	= Ys(id_gd);	

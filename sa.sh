@@ -1,3 +1,3 @@
 #!/bin/bash
 
-./optimize_sa.py --dim 6 --mt 8 --dataset ../leaves_320_png/ -o sa_leaves320_sa_round2.pkl 80 0.95 10 5
+./optimize_sa.py --dim 3 --mt 2 --dataset ../kimia99/ -o kimia99_multi_pareto.pkl 85 0.95 15 5
