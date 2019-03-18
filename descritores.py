@@ -6,11 +6,11 @@ import cv2
 from scipy.interpolate import interp1d
 from scipy.spatial.distance import pdist,squareform
 from math import sqrt,acos
-from oct2py import Oct2Py
+#from oct2py import Oct2Py
 import atexit
 
-oc = Oct2Py('/usr/bin/octave-cli')
-atexit.register(oc.exit)
+#oc = Oct2Py('/usr/bin/octave-cli')
+#atexit.register(oc.exit)
 
 class contour_base:
  '''Represents an binary image contour as a complex discrete signal.
@@ -23,12 +23,13 @@ class contour_base:
  def __init__(self,fn,nc = 256,method = 'cv'):
   self.__i = 0
   if method == 'octave':
-   if type(fn) is str:
-    im = oc.imread(fn)
-    s = oc.extract_longest_cont(im,nc)
-    self.c = np.array([complex(i[0],i[1]) for i in s])
-   elif type(fn) is ndarray:
-    self.c = fn
+   pass
+   #if type(fn) is str:
+ #   im = oc.imread(fn)
+ #   s = oc.extract_longest_cont(im,nc)
+ #   self.c = np.array([complex(i[0],i[1]) for i in s])
+#   elif type(fn) is ndarray:
+#    self.c = fn
   else:
    if type(fn) is str:
     im = cv2.imread(fn,cv2.IMREAD_GRAYSCALE )
@@ -172,136 +173,3 @@ class bendenergy:
     self.__i += 1
     return self.phi[self.__i-1]
 
-# Area integral invariant signature
-def aii(name,r,white_bg = False):
- im = cv2.imread(name,0)
-# Caso imagem seja fundo branco
- if white_bg:
-  im = cv2.bitwise_not(im)
-
- im_aux = np.zeros((im.shape[0]+4*r,im.shape[1]+4*r),dtype=im.dtype)
- im_aux[2*r:im_aux.shape[0]-2*r,2*r:im_aux.shape[1]-2*r] = im
- im = im_aux.copy()
- cnt,h = cv2.findContours(im_aux,cv2.RETR_LIST,cv2.CHAIN_APPROX_NONE)
- l = []
- for a in cnt[0]:
-  c = a[0][0],a[0][1]
-  aux = np.zeros(im.shape,dtype = im.dtype)
-  cv2.circle(aux,c,r,255,-1)
-  aux2 = cv2.bitwise_and(aux,im)
-  cnt2,h = cv2.findContours(aux2,cv2.RETR_LIST,cv2.CHAIN_APPROX_NONE)
-  area = 0
-  for c in cnt2:
-   area = area + cv2.contourArea(c)
-  l.append(area)
-
- return np.array(l)
-
-#class areaintegralinvariant:
-
-# def __init__(self,fn,raio,sigma,n):
-#  self.r = raio
-#  t = np.linspace(0,1,n)
-#  k = curvatura(fn,np.linspace(sigma,sigma,1))
-#  self.ir = np.ndarray((t.size),dtype="double")
-#  self.ir = 2*self.r**2*np.arccos(self.r*k(0,t)/2)
-
-# def __call__(self): return (self.ir)
-
-# Distance integral invariant
-def dii(fn,raio,nc = 256,method = 'cv'):
-  r = raio
-  c = contour_base(fn,nc = nc,method = method)
-  aux = np.vstack([c.c.real,c.c.imag]).T
-  d = squareform(pdist(aux))
-  return np.array([x[np.nonzero(x <= r)].sum() for x in d])
-
-# Centroid distance signature
-def cd(fn,nc = 256,method = 'cv'):
-  img_c = contour_base(fn,nc = nc,method = method)
-  # Calcula dist�ncia ao centr�ide
-  dc = np.abs((img_c()-img_c().mean()))
-  # m = maior distancia do contorno ao centroide
-  m = np.max(dc)
-  return dc/m
-
-# Angle sequence shape signature
-class ass:
-
- def __init__(self,fn,raio,nc = 256,method = 'cv'):
-  r = raio
-  cont = contour_base(fn,nc = nc,method = method).c
-  N = cont.shape[0]
-  low = cont[0:r].copy()
-  high = cont[N-r:N].copy()
-  cont = np.hstack((high,cont,low))
-  a = []
-  for i in np.arange(r,N+r):
-   v1 = cont[i] - cont[i-r]
-   v2 = cont[i+r] - cont[i]
-   cc = (v1*v2).real/float(abs(v1)*abs(v2))
-   if cc > 1.0:
-    cc = 1.0
-   if cc < -1.0:
-    cc = -1.0
-   angle = acos(cc)
-   # angle = np.floor(angle * 180./np.pi)
-   # if angle in np.arange(0.,5.):
-   #  angle = 0
-   # elif angle in np.arange(5.,10.):
-   #  angle = 1
-   # elif angle in np.arange(10.,20.):
-   #  angle = 2
-   # elif angle in np.arange(20.,40.):
-   #  angle = 3
-   # elif angle in np.arange(40.,60.):
-   #  angle = 4
-   # elif angle in np.arange(60.,80.):
-   #  angle = 5
-   # elif angle in np.arange(80.,95.):
-   #  angle = 6
-   # elif angle in np.arange(95.,135.):
-   #  angle = 7
-   # elif angle in np.arange(135.,140.):
-   #  angle = 8
-   # elif angle in np.arange(140.,175.):
-   #  angle = 9
-   # elif angle in np.arange(175.,185.):
-   #  angle = 10
-   a.append(angle)
-
-  self.sig = np.array(a)
-
-# Triangle area signature
-class TAS:
- def TAN(self,c,ts):
-  low = c[0:ts].copy()
-  high = c[self.N-ts:self.N].copy()
-  c = np.hstack((high,c,low))
-
-  ta = []
-  for i in np.arange(ts,self.N+ts):
-   a = 0.5*(c[i].real*(c[i+ts]-c[i-ts]).imag + c[i+ts].real*(c[i-ts]-c[i]).imag + c[i-ts].real*(c[i]-c[i+ts]).imag)
-   ta.append(a)
-   ta = ta/np.abs(ta).max()
-  return ta
-
- def __init__(self,fn,nc = 256, method = 'cv'):
-  cont = contour_base(fn,nc = nc,method = method).c
-  self.N = cont.shape[0]
-  print(fn,self.N)
-  Ts = np.floor((self.N-1)/2)
-  t = []
-  for ts in np.arange(1,Ts):
-   t.append(self.TAN(cont,ts))
-
-  acum = t[0]
-  for a in t[1:]:
-   acum = acum + a
-  self.sig = np.array(acum)/float(Ts)
-
-def fTAS(fn,nc='256'):
-   im = oc.imread(fn)
-   mc  = oc.extract_longest_cont(im,nc)
-   vtas =oc.ftas(mc.T())
-   return vtas.T()

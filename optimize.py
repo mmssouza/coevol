@@ -12,12 +12,13 @@ def set_dim(d):
 
 class sim_ann:
 
- def __init__(self,f,T0,alpha,P,L):
+ def __init__(self,f,T0,alpha,P,L, weights):
   seed()
-  ww = self.weights_gen(3)
-  self.w1 = ww[0]
-  self.w2 = ww[1]
-  self.w3 = ww[2]
+  self.rand_weights = all(v == 0 for v in weights)
+  if self.rand_weights:
+   self.w1,self.w2,self.w3 = self.weights_gen(3)
+  else:
+   self.w1,self.w2,self.w3 = weights
   self.f = f
   self.s = scipy.array([100.15-100.*scipy.rand() for i in range(Dim)])
   self.T = T0
@@ -29,8 +30,8 @@ class sim_ann:
 
   self.pr = 0.7
 
-  self.sd_max = 8.5
-  self.sd_min = .25
+  self.sd_max = 20.5
+  self.sd_min = 5.
   self.sd = self.sd_max - (self.sd_max-self.sd_min)*scipy.rand(Dim)
   self.tau1 = scipy.rand()
   self.tau2 = scipy.rand()
@@ -47,7 +48,7 @@ class sim_ann:
    for i in r[1:]:
     w.append(i-aux)
     aux = i
-   return w
+   return w[0],w[1],w[2]
 
  def Perturba(self,x,sd):
   for i in range(Dim):
@@ -63,11 +64,9 @@ class sim_ann:
   self.nS = 0
 
   while (True):
-   ww = self.weights_gen(3)
-   self.w1 = ww[0]
-   self.w2 = ww[1]
-   self.w3 = ww[2]
-   #print("{:.2} {:.2} {:.2}".format(ww[0],ww[1],ww[2]))
+   if self.rand_weights:   
+    self.w1,self.w2,self.w3 = self.weights_gen(3)
+    #print("{:.2} {:.2} {:.2}".format(self.w1,self.w2,self.w3))
    si = self.Perturba(self.s.copy(),self.sd + self.sd_min)
    aux = self.f([si,self.w1,self.w2,self.w3])
    delta = aux[3] - self.fit[3]
