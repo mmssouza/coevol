@@ -32,9 +32,8 @@ with open(sys.argv[1],'rb') as f:
           print(stt+str().join(["{:,.3} ".format(float(j)) for j in ti[2]]))
          print()
  # formata e mostra resultados
- for hf,w in zip(hall_of_fames,weights):
-      print(str().join(["{:,.3} ".format(float(i)) for i in w]))
-      for h in hf:
+ for hf in hall_of_fames:
+     for h in hf:
         for x in h:
           print(str().join(["{:,.4} ".format(float(i)) for i in x]))
-      print("\n")
+     print("\n")
