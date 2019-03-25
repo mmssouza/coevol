@@ -6,7 +6,7 @@ import matplotlib.pyplot as PLT
 from matplotlib.offsetbox import AnnotationBbox, OffsetImage
 from PIL import Image
 from PIL import ImageColor
-from sklearn.manifold import Isomap,MDS
+from sklearn.manifold import Isomap,MDS,SpectralEmbedding
 from sklearn.preprocessing import scale
 import descritores as desc
 #from scipy.spatial.distance import pdist
@@ -20,7 +20,8 @@ import descritores as desc
 
 # SI = 0.297 DB = 1.07 CH = 37.7
 #sigma = numpy.array([0.36511174,   2.15106849,  64.96898439])
-sigma = numpy.array([0.315, 81.2, 2.07, 5.19])
+#sigma = numpy.array([0.315, 81.2, 2.07, 5.19])
+sigma = numpy.array([6.17,2.22,0.614,0.468])
 ############## grupo 1 ###############
 
 # SI = 0.158 DB= 1.74 CH= 15.9
@@ -339,10 +340,11 @@ X1 = scale(data1[:,1:])
 #print numpy.median(numpy.abs(1.-  s))
 
 #iso = Isomap(n_neighbors=98, max_iter= 2500)
-mds =  MDS(n_init = 20,dissimilarity = 'euclidean',max_iter = 2500)
+#mds =  MDS(n_init = 200,dissimilarity = 'euclidean',max_iter = 1500)
+emb = SpectralEmbedding(n_components=2)
 #X1 = iso.fit_transform(data1[:,1:])
-X1 = mds.fit_transform(data1[:,1:])
-
+#X1 = mds.fit_transform(data1[:,1:])
+X1 = emb.fit_transform(data1[:,1:])
 #r = ((pdist(data1[:,1:]) - pdist(X1))**2).sum()
 #s = ((pdist(X1)-pdist(X1).mean())**2).sum()
 #R2 = 1-r/s

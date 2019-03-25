@@ -64,8 +64,6 @@ class sim_ann:
   self.nS = 0
 
   while (True):
-   if self.rand_weights:   
-    self.w1,self.w2,self.w3 = self.weights_gen(3)
     #print("{:.2} {:.2} {:.2}".format(self.w1,self.w2,self.w3))
    si = self.Perturba(self.s.copy(),self.sd + self.sd_min)
    aux = self.f([si,self.w1,self.w2,self.w3])
@@ -78,7 +76,7 @@ class sim_ann:
    if (i > self.P) or (self.nS > self.L):
     k = 0
     if self.nS > 0:
-     while (self.fit[3] > self.hall_of_fame[k][3]):
+     while (self.fit[3] < self.hall_of_fame[k][3]):
       k = k + 1
       if k == 5:
        break
@@ -91,6 +89,8 @@ class sim_ann:
   self.sd = self.sd*scipy.exp(self.tau2*scipy.randn())*scipy.exp(self.tau1*scipy.randn(Dim))
   self.sd = (self.sd_max-self.sd_min)*scipy.tanh(self.sd/(self.sd_max-self.sd_min))
   #print("".join(["{:2.2} ".format(float(ss)) for ss in self.sd]))
+  if self.rand_weights:   
+   self.w1,self.w2,self.w3 = self.weights_gen(3)
 
 class coevol:
  def __init__(self,fitness_func,ns1 = 10,ns2 = 10,npop1 = 20,pr = 0.3,beta = 0.7,npop2 = 20,w = 0.75,c1 = 1.5,c2 = 1.5,delta = 0.4,alpha = 1.):

@@ -51,7 +51,7 @@ algo = "sa"
 # nn = 0
 # mm = 0
 
-N,M = 300,40
+N,M = 320,40
 
 Head = {'algo':algo,'conf':"T0,alpha,P,L,w0,w1,w2 = {0},{1},{2},{3},{4},{5},{6}".format(conf[0],conf[1],conf[2],conf[3],conf[4],conf[5],conf[6]),'dim':dim,"dataset":dataset}
 
