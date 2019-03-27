@@ -63,10 +63,10 @@ class sim_ann:
   self.nS = 0
 
   while (True):
-   ww = self.weights_gen(3)
-   self.w1 = ww[0]
-   self.w2 = ww[1]
-   self.w3 = ww[2]
+ #  ww = self.weights_gen(3)
+   self.w1 = 1
+   self.w2 = 0
+   self.w3 = 0
    #print("{:.2} {:.2} {:.2}".format(ww[0],ww[1],ww[2]))
    si = self.Perturba(self.s.copy(),self.sd + self.sd_min)
    aux = self.f([si,self.w1,self.w2,self.w3])
@@ -79,13 +79,13 @@ class sim_ann:
    if (i > self.P) or (self.nS > self.L):
     k = 0
     if self.nS > 0:
-     while (self.fit[3] > self.hall_of_fame[k][3]):
+     while (self.fit[3] < self.hall_of_fame[k][3]):
       k = k + 1
       if k == 5:
        break
-      if k < 5:
-        self.hall_of_fame.insert(k,scipy.hstack((self.fit,self.s)))
-        self.hall_of_fame.pop()
+     if k < 5:
+      self.hall_of_fame.insert(k,scipy.hstack((self.fit,self.s)))
+      self.hall_of_fame.pop()
     break
 
   self.T = self.alpha*self.T

@@ -51,7 +51,7 @@ else:
  nn = 0
  mm = 0
 
-N,M = 250,15
+N,M = 200,5
 
 Head = {'algo':algo,'conf':"T0,alpha,P,L = {0},{1},{2},{3}".format(conf[0],conf[1],conf[2],conf[3]),'dim':dim,"dataset":dataset}
 
@@ -78,11 +78,11 @@ if __name__ == '__main__':
  def cost_func(args):
   partial_ff = partial(ff, s = args[0])
   res = pool.map(partial_ff,cnt)
-  si = metrics.silhouette(scale(np.array(res)),np.array(Y)-1)
+  si = metrics.silhouette(scale(np.array(res)),np.array(Y)-1,distance = 'mahalanobis')
   db = metrics.db(scale(np.array(res)),np.array(Y)-1)
   ch = metrics.ch(scale(np.array(res)),np.array(Y)-1)
   w1,w2,w3 = args[1],args[2],args[3]
-  fit = 3*w1*np.median(np.abs(1.-si))+w2*db+50*w3/(ch+1e-12)
+  fit = 3*w1*(np.std(si) + np.median(np.abs(1.-si)))+w2*db+50*w3/(ch+1e-12)
 
   return (np.mean(si),db,ch,fit)
 
@@ -111,5 +111,9 @@ if __name__ == '__main__':
      print(ss)
      pickle.dump([i,w.fit,w.s],f)
     os.remove("dump_optimize_sa2.pkl")
+    print()
+    for hf in w.hall_of_fame:
+     print(hf)
+    print()
     pickle.dump(w.hall_of_fame[0],f)
     nn = 0
