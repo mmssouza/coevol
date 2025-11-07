@@ -1,44 +1,22 @@
-#!/usr/bin/python
+#!/usr/bin/python3
 
-import cPickle
+import pickle
 import pylab
+import sys
 
-with open("teste_de.pkl","r") as f:
- head = cPickle.load(f)
- print head
- N,M = cPickle.load(f)
- print N,M
+with open(sys.argv[1],"rb") as f:
+ head = pickle.load(f)
+ print(head)
+ N,M = pickle.load(f)
+ print(N,M)
  l = []
  b = True
  while b:
   try:
-   l.append(cPickle.load(f))
+   l.append(pickle.load(f))
   except:
    b = False
- l = pylab.array(l).T.reshape((2*M,N)).T
+ l = pylab.array(l)
  pylab.subplot(211) 
- for k in l[:,M:].T:
-  pylab.plot(l[:,0],k,"b")
- pylab.plot(l[:,0],pylab.mean(l[:,M:].T,axis = 0),"r") 
-
-with open("pso_teste.pkl","r") as f:
- head = cPickle.load(f)
- print head
- N,M = cPickle.load(f)
- print N,M
- l = []
- b = True
- while b:
-  try:
-   l.append(cPickle.load(f))
-  except:
-   b = False
- l = pylab.array(l).T.reshape((2*M,N)).T
- pylab.subplot(212) 
- for k in l[:,M:].T:
-  pylab.plot(l[:,0],k,"g")
- pylab.plot(l[:,0],pylab.mean(l[:,M:].T,axis = 0),"r") 
-
- 
-pylab.show()
-  
+ pylab.plot(l[:,0],l[:,1],"b")
+ pylab.show()

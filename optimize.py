@@ -97,15 +97,15 @@ class sim_ann:
    self.w1,self.w2,self.w3 = self.weights_gen(3)
 
 class coevol:
- def __init__(self,fitness_func,ns1 = 10,ns2 = 10,npop1 = 20,pr = 0.3,beta = 0.7,npop2 = 20,w = 0.75,c1 = 1.5,c2 = 1.5,delta = 0.4,alpha = 1.):
+ def __init__(self,fitness_func,ns1 = 10,ns2 = 10,npop1 = 20,pr1 = 0.3,beta1 = 0.7,npop2 = 20,pr2=0.3,beta2=0.7):
   seed()
   self.ns1 = ns1
   self.ns2 = ns2
   self.ff = fitness_func
   f1 = partial(self.f,pop = 5-10.*scipy.rand(ns2,Dim),hf = 5-10.*scipy.rand(5,Dim),ff = self.ff)
   f2 = partial(self.f,pop = 5-10.*scipy.rand(ns1,Dim),hf = 5-10.*scipy.rand(5,Dim),ff = self.ff)
-  self.p1 = de(f1,npop1,pr,beta)
-  self.p2 = pso(f2,npop2,w,c1,c2,delta,alpha)
+  self.p1 = de(f1,npop1,pr1,beta1)
+  self.p2 = de(f2,npop2,pr2,beta2)
   #self.p2 = de(f2,npop1,pr,beta)
 
   self.hall_of_fame1 = []
@@ -119,9 +119,9 @@ class coevol:
   #  self.hall_of_fame2.insert(0,scipy.hstack((self.ff(de_best),de_best)))
 
   self.hall_of_fame2 = []
-  pso_best = self.p2.pop[self.p2.fit.argmin()]
+  de_best = self.p2.pop[self.p2.fit.argmin()]
   for i in scipy.arange(5):
-   self.hall_of_fame2.insert(0,scipy.hstack((self.ff(pso_best),pso_best)))
+   self.hall_of_fame2.insert(0,scipy.hstack((self.ff(de_best),de_best)))
 
  def f(self,x,pop,hf,ff):
   #if (x > 5.).any() or (x < -5.).any():
@@ -131,16 +131,16 @@ class coevol:
   score_x = 0
   ans_x = ff(x)
   ans_pop = scipy.array([ff(y) for y in pop])
-  score_x  = score_x + 4*math.tanh(0.5*(ans_x - ans_pop.mean()))
-  score_x  = score_x + 10*math.tanh(0.5*(ans_x - hf[:,0].mean()))
-  return score_x
-  #for y in ans_pop:
-   #score_x = score_x + 0.15*(ans_x - y)*math.exp(0.95*(ans_x - y))
-   #score_x = score_x + (2*(ans_x - y))**2*scipy.tanh(2*(ans_x - y))
-  #for y in hf[:,0]:
-   #score_x = score_x + 0.85*(ans_x - y)*math.exp(0.95*(ans_x - y))
-   #score_x = score_x + 2*(2*(ans_x - y))**2*scipy.tanh(2*(ans_x - y))
+  #score_x  = score_x + (ans_x - ans_pop.mean())/ans_pop.mean()
+  #score_x  = score_x + (ans_x - hf[:,0].mean())/hf[:,0].mean()
   #return score_x
+  for y in ans_pop:
+   #score_x = score_x + (ans_x - y)*math.exp((ans_x - y))
+   score_x = score_x + (ans_x - y)**2*scipy.tanh(0.5*(ans_x - y))
+  for y in hf[:,0]:
+   #score_x = score_x + 0.85*(ans_x - y)*math.exp(0.95*(ans_x - y))
+   score_x = score_x + (ans_x - y)**2*scipy.tanh(0.5*(ans_x - y))
+  return score_x
 
  def HF_Updt(self,hf,x,y):
   # Hall of fame
@@ -164,9 +164,9 @@ class coevol:
   f2 = partial(self.f,pop = self.p1.pop[i],hf = scipy.array(self.hall_of_fame1),ff = self.ff)
   self.p2.fitness_func = f2
   self.p2.run()
-  #best = self.p2.pop[self.p2.fit.argmin()]
-  #self.HF_Updt(self.hall_of_fame2,self.ff(best),best)
-  self.HF_Updt(self.hall_of_fame2,self.ff(self.p2.bfg),self.p2.bfg)
+  best = self.p2.pop[self.p2.fit.argmin()]
+  self.HF_Updt(self.hall_of_fame2,self.ff(best),best)
+  #self.HF_Updt(self.hall_of_fame2,self.ff(self.p2.bfg),self.p2.bfg)
 
 class de:
 
@@ -229,14 +229,15 @@ class pso:
   self.w = w
   self.ns = int(npop)
   self.ff = fitness_func
-  self.vmax = delta*10.
+  #self.vmax = delta*10.
   self.it = 0
-  self.alpha = alpha
+  #self.alpha = alpha
   self.pop = scipy.array([self.gera_individuo() for i in range(self.ns)])
    # avalia fitness de toda populacao
   self.fit = scipy.array([self.ff(i) for i in self.pop])
    # inicializa velocidades iniciais
-  self.v = scipy.zeros((self.ns,Dim))
+  self.v = scipy.array([self.gera_individuo() for i in range(self.ns)])
+
    # guarda a melhor posicao de cada particula
   self.bfp = scipy.copy(self.pop)
   self.bfp_fitness = scipy.copy(self.fit)
@@ -255,7 +256,7 @@ class pso:
    self.v[i] = self.w*self.v[i]
    self.v[i] = self.v[i] + self.c1*scipy.rand()*( self.bfp[i] - self.pop[i])
    self.v[i] = self.v[i] + self.c2*scipy.rand()*(self.bfg - self.pop[i])
-   self.v[i] = self.vmax*scipy.tanh(self.v[i]/self.vmax)
+   #self.v[i] = self.vmax*scipy.tanh(self.v[i]/self.vmax)
    self.pop[i] = self.pop[i] + self.v[i]
    self.fit[i] = self.ff(self.pop[i])
    # Atualiza melhor posicao da particula
@@ -266,7 +267,7 @@ class pso:
     if  self.bfp_fitness[i] < self.bfg_fitness:
      self.bfg_fitness = self.bfp_fitness[i].copy()
      self.bfg = self.bfp[i].copy()
-  self.vmax = self.vmax*self.alpha
+  #self.vmax = self.vmax*self.alpha
 
 
 #############################

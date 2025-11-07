@@ -1,7 +1,4 @@
 *.pyc
-resultados
 *.*~
 *.txt
 *.pkl
-octave-workspace
-resultados
