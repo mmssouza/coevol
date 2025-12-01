@@ -1,60 +1,97 @@
 #!/usr/bin/python3 -u
 
 import sys
+
 import getopt
 import pickle
 import optimize
 import numpy as np
 from functools import partial
 import time
+from multiprocessing import shared_memory, Process
+import numpy as np
 
-fout = ""
-dim = -1
-try:                                
- opts,args = getopt.getopt(sys.argv[1:], "o:d:", ["dim=","output="])
-except getopt.GetoptError:           
- print("Error getopt") 
- sys.exit(2)          
- 
-for opt,arg in opts:
- if opt in ("-o","--output"):
-  fout = arg  
- elif opt == "--dim":
-  dim = int(arg) 
-  
-conf = [float(i) for i in args]
+def de_process(Niter,ff,npop,pr,beta,Ns,shm_name):
 
-if fout == "" or len(conf) != 8 or dim <= 0:
- print("Error getopt") 
- sys.exit(2)
+    de = optimize.de(ff,npop,pr,beta)
 
-algo = "coevol"
-N,M = 455,1
+    shm = shared_memory.SharedMemory(name=shm_name)
 
-Head = {'algo':algo,'conf':"ns1 = {0}, ns2 = {1}, de1: (npop,pr,beta) = ({2}, {3}, {4}), de2: (npop,pr,beta) = ({5},{6},{7})".format(conf[0],conf[1],conf[2],conf[3],conf[4],conf[5],conf[6],conf[7]),'dim':dim}
-     
-if __name__ == '__main__':
- optimize.set_dim(dim)
+    pool = np.ndarray((Ns,optimize.Dim), dtype=float, buffer=shm.buf)
+    pool_pso = pool[int(Ns/2):]
+    pool_de  = pool[0:int(Ns/2)]
 
- with open(fout,"wb") as f:
-  pickle.dump(Head,f)
-  pickle.dump((N,M),f)
-  for j in range(M):
-   w = optimize.coevol(optimize.f3,ns1 = int(conf[0]),ns2 = int(conf[1]),npop1 = int(conf[2]),pr1 = conf[3],beta1 = conf[4],npop2 = int(conf[5]),pr2 = conf[6],beta2 = conf[7])
-   for i in range(N):
-    w.run()
-    print (j,i)
-    print ("de1 ",w.p1.fit.min(),w.ff(w.p1.pop[w.p1.fit.argmin()]))
-	#print "de2 ",w.p2.fit.min(),w.p1.pop[w.p2.fit.argmin()]
-    print ("de2 ",w.p2.fit.min(),w.ff(w.p2.pop[w.p2.fit.argmin()]))
-	#time.sleep(0.2)
-	#print
-    #pickle.dump([i,w.p1.fit.min(),w.ff(w.p1.pop[w.p1.fit.argmin()]),w.p2.bfg_fitness,w.ff(w.p2.bfg)],f)
-	#pickle.dump([i,w.p1.fit.min(),w.ff(w.p1.pop[w.p1.fit.argmin()]),w.p2.fit.min(),w.ff(w.p2.pop[w.p2.fit.argmin()])],f)
-   #print("------------------------------------------------------")
-   #print( w.hall_of_fame1[0])
-   #print( w.hall_of_fame2[0])
-   #print( "------------------------------------------------------")
-   #pickle.dump(w.hall_of_fame1[0],f)
-   #pickle.dump(w.hall_of_fame2[0],f)  
+    for i in range(Niter):
+     de.run()
+     min_fit= de.fit.min()
+     print(f"de process:  {i:4d} {min_fit:2.3f}")
+     #idx1 = np.argsort(de.fit)
+     idx1 = np.random.permutation(npop)[0:int(Ns/2)]
+     #pool_de[:] = de.pop[idx1][0:int(Ns/2)]
+     pool_de[:] = de.pop[idx1]
+     # Close the shared memor0y instance in the child process
+     if i % 50 == 0:
+      idx2 = np.random.permutation(npop)[0:int(Ns/2)]
+      de.pop[idx2]= pool_pso
+      for s,j in zip(de.pop[idx2],idx2):
+       de.fit[j]= ff(s)
 
+    shm.close()
+
+def pso_process(Niter,ff,npop,w,c1,c2,Ns,shm_name):
+
+    pso = optimize.pso(ff,npop,w,c1,c2)
+
+    shm = shared_memory.SharedMemory(name=shm_name)
+
+    pool = np.ndarray((Ns,optimize.Dim), dtype=float, buffer=shm.buf)
+    pool_pso = pool[int(Ns/2):]
+    pool_de  = pool[0:int(Ns/2)]
+
+    for i in range(Niter):
+     pso.run()
+     min_fit = pso.fit.min()
+     print(f"pso process: {i:12d} {min_fit:2.3f}")
+     #idx1 = np.argsort(pso.fit)
+     #pool_pso[:] = pso.pop[idx1][0:int(Ns/2)]
+     idx1 = np.random.permutation(npop)[0:int(Ns/2)]
+     pool_pso[:] = pso.pop[idx1]
+     # Close the shared memory instance in the child process
+     if i % 50 == 0:
+      idx2 = np.random.permutation(npop)[0:int(Ns/2)]
+      pso.pop[idx2]= pool_de
+      for s,j in zip(pso.pop[idx2],idx2):
+       pso.fit[j]= ff(s)
+
+    shm.close()
+
+
+if __name__ == "__main__":
+# objective function dimension
+    DIM = 10000
+
+    optimize.set_dim(DIM)
+# pool of solutions (must be even)
+    Ns = 4
+    rnd = np.random.default_rng().random(size=(Ns,DIM),dtype=float)
+# shared memory for pool where optimizers share their best solutions
+    shm = shared_memory.SharedMemory(create=True, size=Ns*DIM*rnd.itemsize)
+    pool = np.ndarray((Ns,DIM),dtype=float,buffer=shm.buf)
+    pool[:,:] = rnd
+
+    # Create and start optimizers (child processes)
+    p1 = Process(target=de_process, args=(2000,optimize.f3,100,0.4,0.9,Ns,shm.name))
+    p2 = Process(target=pso_process, args=(2000,optimize.f3,100,0.05,2.3,2.3,Ns,shm.name))
+    p1.start()
+    p2.start()
+
+    p1.join()  # Wait for child processes to finish
+    p2.join()
+
+# print pool of soluctions and objective evaluated
+    for pp in pool:
+     print(pp,optimize.f3(pp))
+
+    # Clean up: close and unlink the shared memory block
+    shm.close()
+    shm.unlink()
