@@ -1,0 +1,20 @@
+---
+# coevolution
+Niter: 500
+Ns: 120
+...
+---
+# de
+npop: 500
+pr: 0.8
+beta: 0.05
+epoch: 25
+...
+---     
+# pso
+npop: 100
+w: 0.7
+c1: 2.2
+c2: 2.2
+epoch: 30
+...
